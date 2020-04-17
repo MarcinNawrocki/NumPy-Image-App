@@ -4,7 +4,9 @@ import time
 import numpy as np 
 from PIL import Image
 import matplotlib.pyplot as plt
-
+from skimage import data
+from skimage import filters
+from skimage import exposure
 
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
 def readImage(filename, verbose=False):
@@ -15,14 +17,16 @@ def readImage(filename, verbose=False):
     verbose -- if true showing image(default False)
 
     Return:
-    image as Numpy Arra
+    image as Numpy Array
     """
 
     pil_image = Image.open(filename)
     if verbose:
         pil_image.show()
+    
     np_image = np.array(pil_image, dtype=np.uint8)
     np_image.setflags(write=1)
+    #print(filters.threshold_otsu(np_image))
     return np_image
 
 def saveImage(np_image, filename, verbose=False):
@@ -123,25 +127,55 @@ def getStatisticImageParameters(np_image_2dim):
     """Return statistical image parameters as dictionary(Variance, Standard devation, Median, Average)
 
     Keyword argument:
-    np_image -- image as 2D NumPy array(whole grayscale or one color channel)
+    np_image_2dim -- image as 2D NumPy array(whole grayscale or one color channel)
     Return:
         Python dictionary with keys: Variance, Standard devation, Median, Average 
     """
 
     return {'Variance' : np.var(np_image_2dim), 'Standard devation' : np.std(np_image_2dim), "Median" : np.median(np_image_2dim), "Average" : np.average(np_image_2dim)}
 
-def getImageHistogram(np_image_2dim):
+def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
+    """ Return histogram for image in 2D Numpy array(grayscale or single channel)
+    Keyword argument:
+    np_image_2dim -- image as 2D NumPy array(whole grayscale or one color channel)
+    normalize -- if set to True histogram values will be normalized(default = False)
+    with_bins -- return also bins as numpy arra(default= False)
+    Return:
+    histogram as NumPy array,
+    bins ans NumPy array if with_bins = True
+
     """
-    Return histogram for image in 2D Numpy array(grayscale or single channel)
+    np_image_2dim = np_image_2dim.ravel()
+    np_hist =  np.histogram(np_image_2dim.ravel(), bins=range(257))[0]
+    #np_hist, bin_edges =  _bincount_histogram(image, source_range)
+
+    if normalize:
+        np_hist = np_hist / np.sum(hist)
+    if with_bins:
+        #np_hist[:10] = np.zeros(10)
+        np_bins = np.nonzero(np_hist)
+        np_bins = np_bins[0]
+        min_edge = np_bins[0]
+        max_edge = np_bins[-1]
+        np_hist = np_hist[min_edge:max_edge+1]
+
+        return np_hist, np_bins
+    else:
+        return np_hist
+
+def ensureGrayscale(np_image):
+    """Ensures that given image is in grayscale
+
+    Keyword argument:
+    np_image -- image as NumPy array
+    Return:
+    np_image as grayscale
     """
-    return np.histogram(np_image_2dim, bins=range(257))[0]
+    if len(np_image.shape) == 3:
+        np_image = getMachineGrayscale(np_image)
+    
+    return np_image
 
-
-
-data = readImage("obraz.bmp", verbose=False)
-data_gray = getHumanGrayscale(data)
-data_rgb = getRGB(data_gray)
-saveImage(data_rgb, "RGB.bmp", verbose=True)
 
 #pętla przez wszystkie piksele
 #for xy in np.ndindex(data.shape[:2]):

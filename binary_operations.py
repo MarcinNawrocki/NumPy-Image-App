@@ -1,0 +1,157 @@
+import time
+import numpy as np 
+from PIL import Image
+import matplotlib.pyplot as plt
+from skimage import exposure
+import basic_operations as bs 
+
+
+def thresholdBinaryzation(np_image, threshold):
+    """Return binaryzed image based on threshold given by user
+
+    Keyword argument:
+    np_image -- image as NumPy array
+    thershold -- integer value in range (0,255)
+    Return:
+        Binaryzed image as numpy array with 0 and 255 values
+    """
+    if threshold > 255 or threshold < 0:
+        return np_image
+    #np_image = bs.ensureGrayscale(np_image)
+    np_image = np.where(np_image > threshold,255,0)
+    np_image = np_image.astype(np.uint8)
+    return np_image
+    
+def otsuBinaryzation(np_image):
+    """Return binaryzed image, getting by use of Otsu method
+    Algorithm calculated Otsu using maximalization between class variance
+
+    Keyword argument:
+    np_image -- image as NumPy array
+    Return:
+        Binaryzed image as numpy array with 0 and 255 values
+    """
+    #np_image = bs.ensureGrayscale(np_image)
+    #np_hist = bs.getImageHistogram(np_image, normalize=True, verbose=True)
+   
+    #np_hist, np_thresholds = exposure.histogram(np_image.ravel(), 256, source_range='image')
+    np_hist, np_thresholds = bs.getImageHistogram(np_image, with_bins=True)
+    #np_hist = np_hist.astype(float)
+    np_hist = np_hist.astype(float)
+
+    np_p_ob = np.cumsum(np_hist)
+    np_p_bg = np.cumsum(np_hist[::-1])[::-1]
+
+    #np_thresholds = np.arange(0,256)
+    
+
+    #hanling divide by zero
+
+    np_u_ob = np.cumsum(np_hist * np_thresholds) /  np_p_ob
+    np_u_bg = (np.cumsum((np_hist * np_thresholds)[::-1]) / np_p_bg[::-1])[::-1]
+
+    np_bcv = np_p_ob[:-1]  * np_p_bg[1:] * (np_u_ob[:-1]-np_u_bg[1:]) ** 2
+
+    otsu_threshold = np.argmax(np_bcv)
+    #print(otsu_threshold)
+    return thresholdBinaryzation(np_image, otsu_threshold)
+
+def dilate(np_image_bin, struct_elem='rect', size=3):
+    """Execute dilate morphological operation on binaryzed image
+
+    Keyword argument:
+    np_image_bin -- binaryzed image
+    struct_elem:
+        cross - cross structural element
+        rect - rectangle structural element
+        circ -- cricle structural element(maybe implemente)
+    size: size of struct element, should be 2N+1
+    Return:
+        Binarized image after dilatation operation
+    """
+    np_image_bin = np_image_bin.astype(np.uint8)
+    np_image_dil = np.zeros(np_image_bin.shape, dtype=np.uint8)
+    
+    #np_image_bin = np.arange(625).reshape((25,25))
+    #rectangle
+    dir_size = int((size-1)/2)
+    #print(x_max, y_max)
+    for index, x in np.ndenumerate(np_image_bin):
+        np_window = getWindow(np_image_bin, index, dir_size, struct_elem)
+
+        if np_window.min() != 0:
+            np_image_dil[index[0], index[1]] = 255
+
+    return np_image_dil 
+
+def erode(np_image_bin, struct_elem='rect', size=3):
+    """Execute erode morphological operation on binaryzed image
+
+    Keyword argument:
+    np_image_bin -- binaryzed image
+    struct_elem:
+        cross - cross structural element
+        rect - rectangle structural element
+        circ -- cricle structural element(maybe implemente)
+    size: size of struct element, should be 2N+1
+    Return:
+        Binarized image after erode operation
+    """
+    np_image_bin = np_image_bin.astype(np.uint8)
+    np_image_er = np.zeros(np_image_bin.shape, dtype=np.uint8)
+    
+    #np_image_bin = np.arange(625).reshape((25,25))
+    #rectangle
+    dir_size = int((size-1)/2)
+    #print(x_max, y_max)
+    for index, x in np.ndenumerate(np_image_bin):
+        np_window = getWindow(np_image_bin, index, dir_size, struct_elem)
+        
+        if np_window.max() == 255:
+            np_image_er[index[0], index[1]] = 255
+
+    return np_image_er
+def getWindow(np_image_bin, index, dir_size,  struct_elem):
+    """Get window for morphological operations
+
+    Keyword argument:
+    index -- indexes of actual processing pixel as tuple
+    dir_size -- size of structural element in one direction (dir_size = (size-1)/2)
+    x_max -- max value of x index
+    y_max -- max value of y index
+    Return:
+    np_window -- window of morphological operations with specific size and shape
+    """
+    x_max, y_max = np_image_bin.shape[:2]
+    y_1 = index[1] - dir_size if index[1] - dir_size >= 0 else 0
+    y_2 = index [1] + dir_size + 1 if index [1] + dir_size + 1  < y_max else -1
+    x_1 = index[0] - dir_size if index[0] - dir_size >= 0 else 0
+    x_2 = index [0] + dir_size + 1 if index [0] + dir_size + 1 < x_max else -1
+    #choose  window
+    #
+    #cross window
+
+    if struct_elem == 'rect':
+        np_window = np_image_bin[x_1:x_2, y_1:y_2]
+    elif struct_elem == 'cross':
+        cross_vert = np_image_bin[x_1:x_2, index[1]]
+        cross_hor = np_image_bin [index[0], y_1:y_2]
+        np_window = np.concatenate((cross_vert, cross_hor))
+    else:
+        #TODO
+        pass
+    return np_window
+
+
+
+
+data_cam = bs.readImage("bin1.png", verbose=False)
+#data_gray = getHumanGrayscale(data)
+
+data_bin = otsuBinaryzation(data_cam)
+data_dil = dilate(data_bin, size=3, struct_elem='rect')
+data_er = erode(data_bin, size=3, struct_elem='rect')
+#data_bin = thresholdBinaryzation(data_cam, 152)
+bs.saveImage(data_bin, "Bin.png", verbose=True)
+bs.saveImage(data_dil, "Bin.png", verbose=True)
+bs.saveImage(data_er, "Bin.png", verbose=True)
