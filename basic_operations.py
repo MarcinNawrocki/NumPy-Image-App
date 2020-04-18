@@ -4,9 +4,9 @@ import time
 import numpy as np 
 from PIL import Image
 import matplotlib.pyplot as plt
-from skimage import data
-from skimage import filters
-from skimage import exposure
+#from skimage import data
+#from skimage import filters
+#from skimage import exposure
 
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
 def readImage(filename, verbose=False):
@@ -23,8 +23,12 @@ def readImage(filename, verbose=False):
     pil_image = Image.open(filename)
     if verbose:
         pil_image.show()
-    
+
     np_image = np.array(pil_image, dtype=np.uint8)
+    if np_image.shape[2] == 3:
+        if np.array_equiv(np_image[:,:,0],np_image[:,:,1]) and np.array_equiv(np_image[:,:,2],np_image[:,:,1]):
+            np_image = np_image[:,:,0]
+            np_image = grayTo2D(np_image)
     np_image.setflags(write=1)
     #print(filters.threshold_otsu(np_image))
     return np_image
@@ -44,10 +48,15 @@ def saveImage(np_image, filename, verbose=False):
     #tutaj w zależności jest czy obraz czarno biały czy kolorowy różne
     #image2 = Image.fromarray(grayscale, mode ='L')
     mode = getImageColorType(np_image)
+    if mode == 'xy1':
+        np_image = grayTo2D(np_image)
+        mode = getImageColorType(np_image)
+
+
     pil_image = Image.fromarray(np_image, mode=mode)
     if verbose:
         pil_image.show()
-    pil_image.save(filename)
+    #pil_image.save(filename)
     #return coś o powodzeniu operacji
 
 def getHumanGrayscale(np_image):
@@ -63,8 +72,9 @@ def getHumanGrayscale(np_image):
 
     to_mono_vector = [0.2125 , 0.7154 , 0.0721 ]
     np_image_gray = np.zeros((np_image.shape[0],np_image.shape[1]), dtype=np.uint8)
-    np_image_gray = np.around(to_mono_vector[0]*np_image[:,:,0] + to_mono_vector[1]*np_image[:,:,1] + to_mono_vector[2]*data[:,:,2])
+    np_image_gray = np.around(to_mono_vector[0]*np_image[:,:,0] + to_mono_vector[1]*np_image[:,:,1] + to_mono_vector[2]*np_image[:,:,2])
     np_image_gray = np_image_gray.astype(np.uint8)
+    np_image_gray = grayTo2D(np_image_gray)
     return np_image_gray
 
 def getMachineGrayscale(np_image):
@@ -82,6 +92,7 @@ def getMachineGrayscale(np_image):
     np_image_gray = np.zeros((np_image.shape[0],np_image.shape[1]), dtype=np.uint8)
     np_image_gray = np.around(np.mean(np_image, axis=2))
     np_image_gray = np_image_gray.astype(np.uint8)
+    np_image_gray = grayTo2D(np_image_gray)
     return np_image_gray
 
 def getImageColorType(np_image):
@@ -96,7 +107,10 @@ def getImageColorType(np_image):
     """
 
     if len(np_image.shape) == 3:
-        return 'RGB'
+        if np_image.shape[2] == 3:
+            return 'RGB'
+        else:
+            return 'xy1'
     elif len(np_image.shape) == 2:
         return 'L'
     #tutaj jakaś obsługa błędów
@@ -176,8 +190,30 @@ def ensureGrayscale(np_image):
     
     return np_image
 
+def grayTo3D(np_image):
+    """
+    Reshaping np_image grayscale image to 3 dimension 
+    e.g np_image with shape(x,y) will be reshaping to (x,y,1)
+    """
+    return np_image.reshape((np_image.shape[0], np_image.shape[1],1))
+
+def grayTo2D(np_image):
+    """
+    Reshaping np_image grayscale image to 2 dimension 
+    e.g np_image with shape(x,y,1) will be reshaping to (x,y)
+    """
+    return np_image.reshape((np_image.shape[0], np_image.shape[1]))
 
 #pętla przez wszystkie piksele
 #for xy in np.ndindex(data.shape[:2]):
   # print(str(data[xy])+", " + str(data[xy]))
 
+#data = readImage("Lena-gray.png", verbose=True)
+#TODO:
+    #check if operations in files done unnecessary validation of image checking
+    #implementing errors catching
+    #check if this operations changing the original image(propably yes, so maybe some copy should be performed)
+    #histogram check for 2d and 3d gray images
+    # saving 3 dimensional gray image(sth like fix in getting mode)
+
+    

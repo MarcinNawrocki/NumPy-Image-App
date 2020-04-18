@@ -31,9 +31,7 @@ def otsuBinaryzation(np_image):
     Return:
         Binaryzed image as numpy array with 0 and 255 values
     """
-    #np_image = bs.ensureGrayscale(np_image)
-    #np_hist = bs.getImageHistogram(np_image, normalize=True, verbose=True)
-   
+
     #np_hist, np_thresholds = exposure.histogram(np_image.ravel(), 256, source_range='image')
     np_hist, np_thresholds = bs.getImageHistogram(np_image, with_bins=True)
     #np_hist = np_hist.astype(float)
@@ -41,9 +39,6 @@ def otsuBinaryzation(np_image):
 
     np_p_ob = np.cumsum(np_hist)
     np_p_bg = np.cumsum(np_hist[::-1])[::-1]
-
-    #np_thresholds = np.arange(0,256)
-    
 
     #hanling divide by zero
 
@@ -111,6 +106,7 @@ def erode(np_image_bin, struct_elem='rect', size=3):
             np_image_er[index[0], index[1]] = 255
 
     return np_image_er
+
 def getWindow(np_image_bin, index, dir_size,  struct_elem):
     """Get window for morphological operations
 
@@ -143,15 +139,12 @@ def getWindow(np_image_bin, index, dir_size,  struct_elem):
     return np_window
 
 
-
-
-data_cam = bs.readImage("bin1.png", verbose=False)
-#data_gray = getHumanGrayscale(data)
+data_cam = bs.readImage("bin1.png", verbose=True)
+#data_gray = bs.getHumanGrayscale(data)
 
 data_bin = otsuBinaryzation(data_cam)
 data_dil = dilate(data_bin, size=3, struct_elem='rect')
 data_er = erode(data_bin, size=3, struct_elem='rect')
-#data_bin = thresholdBinaryzation(data_cam, 152)
 bs.saveImage(data_bin, "Bin.png", verbose=True)
 bs.saveImage(data_dil, "Bin.png", verbose=True)
 bs.saveImage(data_er, "Bin.png", verbose=True)
