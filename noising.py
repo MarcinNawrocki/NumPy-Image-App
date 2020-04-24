@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import basic_operations as bs
-
+import filtering as fil
 
 def saltPepperNoising(np_image, propability = 0.05, saltPepperRatio = 0.5):
     """Adding salt pepper nois to given image
@@ -34,13 +34,14 @@ def saltPepperNoising(np_image, propability = 0.05, saltPepperRatio = 0.5):
     #sprawdzanie czy się nie powtarzają??
     #sprawdzanie czy nie jest kwadratowy, wtedy oszczednosc w iteracjach, oraz czy nie jest wyzerowane
 
+    np_image_nois = np.copy(np_image)
     for x,y in xySalt:
-        np_image[x,y] = salt
+        np_image_nois[x,y] = salt
 
     for x,y in xyPepper:
-        np_image[x,y] = pepper
+        np_image_nois[x,y] = pepper
 
-    return np_image
+    return np_image_nois
 
 def gaussianNoise(np_image_3D, std_dev=0.1, mean=0):
     """Adding gaussian noise with to given image
@@ -61,8 +62,9 @@ data = bs.readImage("Lena.png", verbose=True)
 #data2 = bs.readImage("bin1.png", verbose=False)
 data = bs.getHumanGrayscale(data)
 #data_gray = bs.grayTo3D(data_gray)
-data = bs.grayTo3D(data)
-data_noise = gaussianNoise(data)
-#data_noise2 = saltPepperNoising(data2, propability=0.4)
+#data = bs.grayTo3D(data)
+#data_noise = gaussianNoise(data)
+data_noise = saltPepperNoising(data, propability=0.4)
 bs.saveImage(data_noise, "Bin.png", verbose=True)
-#bs.saveImage(data_noise2, "Bin.png", verbose=True)
+data_filter = fil.medianFilter(data_noise, size=3, struct_elem='rect')
+bs.saveImage(data_filter, "Bin.png", verbose=True)

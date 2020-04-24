@@ -52,7 +52,6 @@ def saveImage(np_image, filename, verbose=False):
         np_image = grayTo2D(np_image)
         mode = getImageColorType(np_image)
 
-
     pil_image = Image.fromarray(np_image, mode=mode)
     if verbose:
         pil_image.show()
@@ -78,7 +77,6 @@ def getHumanGrayscale(np_image):
     return np_image_gray
 
 def getMachineGrayscale(np_image):
-
     """Convert image to "Machine" grayscale (R+G+B)/3
 
     Keyword argument:
@@ -204,16 +202,44 @@ def grayTo2D(np_image):
     """
     return np_image.reshape((np_image.shape[0], np_image.shape[1]))
 
+def getWindow(np_image_bin, index, dir_size,  struct_elem):
+    """Get window for morphological and filtering  operations
+
+    Keyword argument:
+    index -- indexes of actual processing pixel as tuple
+    dir_size -- size of structural element in one direction (dir_size = (size-1)/2)
+    x_max -- max value of x index
+    y_max -- max value of y index
+    Return:
+    np_window -- window of morphological operations with specific size and shape
+    """
+    #zobaczyc czy to zadziała dla 3D
+    x_max, y_max = np_image_bin.shape[:2]
+    y_1 = index[1] - dir_size if index[1] - dir_size >= 0 else 0
+    y_2 = index [1] + dir_size + 1 if index [1] + dir_size + 1  < y_max else -1
+    x_1 = index[0] - dir_size if index[0] - dir_size >= 0 else 0
+    x_2 = index [0] + dir_size + 1 if index [0] + dir_size + 1 < x_max else -1
+
+    if struct_elem == 'rect':
+        np_window = np_image_bin[x_1:x_2, y_1:y_2]
+    elif struct_elem == 'cross':
+        cross_vert = np_image_bin[x_1:x_2, index[1]]
+        cross_hor = np_image_bin [index[0], y_1:y_2]
+        np_window = np.concatenate((cross_vert, cross_hor))
+    else:
+        #TODO
+        pass
+
+    return np_window
 #pętla przez wszystkie piksele
 #for xy in np.ndindex(data.shape[:2]):
   # print(str(data[xy])+", " + str(data[xy]))
 
-#data = readImage("Lena-gray.png", verbose=True)
+data = readImage("Lena-gray.png", verbose=True)
+data = grayTo3D(data)
+saveImage(data, "Bin.png", verbose=True)
 #TODO:
-    #check if operations in files done unnecessary validation of image checking
+    #filtering test
     #implementing errors catching
-    #check if this operations changing the original image(propably yes, so maybe some copy should be performed)
-    #histogram check for 2d and 3d gray images
-    # saving 3 dimensional gray image(sth like fix in getting mode)
 
     

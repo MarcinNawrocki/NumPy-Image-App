@@ -6,34 +6,34 @@ from skimage import exposure
 import basic_operations as bs 
 
 
-def thresholdBinaryzation(np_image, threshold):
+def thresholdBinaryzation(np_image_2D, threshold):
     """Return binaryzed image based on threshold given by user
 
     Keyword argument:
-    np_image -- image as NumPy array
+    np_image_2D -- image as NumPy array
     thershold -- integer value in range (0,255)
     Return:
         Binaryzed image as numpy array with 0 and 255 values
     """
     if threshold > 255 or threshold < 0:
-        return np_image
+        return np_image_2D
     #np_image = bs.ensureGrayscale(np_image)
-    np_image = np.where(np_image > threshold,255,0)
-    np_image = np_image.astype(np.uint8)
-    return np_image
+    np_image_thr = np.where(np_image_2D > threshold,255,0)
+    np_image_thr = np_image_thr.astype(np.uint8)
+    return np_image_thr
     
-def otsuBinaryzation(np_image):
+def otsuBinaryzation(np_image_2D):
     """Return binaryzed image, getting by use of Otsu method
     Algorithm calculated Otsu using maximalization between class variance
 
     Keyword argument:
-    np_image -- image as NumPy array
+    np_image_2D -- image as NumPy array
     Return:
         Binaryzed image as numpy array with 0 and 255 values
     """
-
+    #check 3D or specified only to 2D(threshold also)
     #np_hist, np_thresholds = exposure.histogram(np_image.ravel(), 256, source_range='image')
-    np_hist, np_thresholds = bs.getImageHistogram(np_image, with_bins=True)
+    np_hist, np_thresholds = bs.getImageHistogram(np_image_2D, with_bins=True)
     #np_hist = np_hist.astype(float)
     np_hist = np_hist.astype(float)
 
@@ -49,7 +49,7 @@ def otsuBinaryzation(np_image):
 
     otsu_threshold = np.argmax(np_bcv)
     #print(otsu_threshold)
-    return thresholdBinaryzation(np_image, otsu_threshold)
+    return thresholdBinaryzation(np_image_2D, otsu_threshold)
 
 def dilate(np_image_bin, struct_elem='rect', size=3):
     """Execute dilate morphological operation on binaryzed image
@@ -72,7 +72,7 @@ def dilate(np_image_bin, struct_elem='rect', size=3):
     dir_size = int((size-1)/2)
     #print(x_max, y_max)
     for index, x in np.ndenumerate(np_image_bin):
-        np_window = getWindow(np_image_bin, index, dir_size, struct_elem)
+        np_window = bs.getWindow(np_image_bin, index, dir_size, struct_elem)
 
         if np_window.min() != 0:
             np_image_dil[index[0], index[1]] = 255
@@ -100,24 +100,16 @@ def erode(np_image_bin, struct_elem='rect', size=3):
     dir_size = int((size-1)/2)
     #print(x_max, y_max)
     for index, x in np.ndenumerate(np_image_bin):
-        np_window = getWindow(np_image_bin, index, dir_size, struct_elem)
+        np_window = bs.getWindow(np_image_bin, index, dir_size, struct_elem)
         
         if np_window.max() == 255:
             np_image_er[index[0], index[1]] = 255
 
     return np_image_er
 
+"""
 def getWindow(np_image_bin, index, dir_size,  struct_elem):
-    """Get window for morphological operations
 
-    Keyword argument:
-    index -- indexes of actual processing pixel as tuple
-    dir_size -- size of structural element in one direction (dir_size = (size-1)/2)
-    x_max -- max value of x index
-    y_max -- max value of y index
-    Return:
-    np_window -- window of morphological operations with specific size and shape
-    """
     x_max, y_max = np_image_bin.shape[:2]
     y_1 = index[1] - dir_size if index[1] - dir_size >= 0 else 0
     y_2 = index [1] + dir_size + 1 if index [1] + dir_size + 1  < y_max else -1
@@ -137,7 +129,7 @@ def getWindow(np_image_bin, index, dir_size,  struct_elem):
         #TODO
         pass
     return np_window
-
+"""
 
 data_cam = bs.readImage("bin1.png", verbose=True)
 #data_gray = bs.getHumanGrayscale(data)
