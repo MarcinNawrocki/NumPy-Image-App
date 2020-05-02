@@ -4,6 +4,7 @@ import basic_operations as bs
 import filtering as fil
 
 def saltPepperNoising(np_image, propability = 0.05, saltPepperRatio = 0.5):
+
     """Adding salt pepper nois to given image
     Keyword argument:
     np_image -- image to apply noising
@@ -16,6 +17,7 @@ def saltPepperNoising(np_image, propability = 0.05, saltPepperRatio = 0.5):
     Return:
         Image noised with specified values. Dimension the same as given.
     """
+
     if len(np_image.shape) == 3:
             salt = (255,255,255)
             pepper = (0,0,0)
@@ -58,13 +60,4 @@ def gaussianNoise(np_image_3D, std_dev=0.1, mean=0):
     np_image_3D = np_image_3D + np_gauss
     return np_image_3D
 
-data = bs.readImage("Lena.png", verbose=True)
-#data2 = bs.readImage("bin1.png", verbose=False)
-data = bs.getHumanGrayscale(data)
-#data_gray = bs.grayTo3D(data_gray)
-#data = bs.grayTo3D(data)
-#data_noise = gaussianNoise(data)
-data_noise = saltPepperNoising(data, propability=0.4)
-bs.saveImage(data_noise, "Bin.png", verbose=True)
-data_filter = fil.medianFilter(data_noise, size=3, struct_elem='rect')
-bs.saveImage(data_filter, "Bin.png", verbose=True)
+

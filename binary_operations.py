@@ -15,9 +15,7 @@ def thresholdBinaryzation(np_image_2D, threshold):
     Return:
         Binaryzed image as numpy array with 0 and 255 values
     """
-    if threshold > 255 or threshold < 0:
-        return np_image_2D
-    #np_image = bs.ensureGrayscale(np_image)
+   
     np_image_thr = np.where(np_image_2D > threshold,255,0)
     np_image_thr = np_image_thr.astype(np.uint8)
     return np_image_thr
@@ -31,16 +29,14 @@ def otsuBinaryzation(np_image_2D):
     Return:
         Binaryzed image as numpy array with 0 and 255 values
     """
-    #check 3D or specified only to 2D(threshold also)
-    #np_hist, np_thresholds = exposure.histogram(np_image.ravel(), 256, source_range='image')
+
     np_hist, np_thresholds = bs.getImageHistogram(np_image_2D, with_bins=True)
+    #[hist, _] = np.histogram(np_image_2D, bins=256, range=(0, 255))
     #np_hist = np_hist.astype(float)
     np_hist = np_hist.astype(float)
 
     np_p_ob = np.cumsum(np_hist)
     np_p_bg = np.cumsum(np_hist[::-1])[::-1]
-
-    #hanling divide by zero
 
     np_u_ob = np.cumsum(np_hist * np_thresholds) /  np_p_ob
     np_u_bg = (np.cumsum((np_hist * np_thresholds)[::-1]) / np_p_bg[::-1])[::-1]
@@ -131,12 +127,3 @@ def getWindow(np_image_bin, index, dir_size,  struct_elem):
     return np_window
 """
 
-data_cam = bs.readImage("bin1.png", verbose=True)
-#data_gray = bs.getHumanGrayscale(data)
-
-data_bin = otsuBinaryzation(data_cam)
-data_dil = dilate(data_bin, size=3, struct_elem='rect')
-data_er = erode(data_bin, size=3, struct_elem='rect')
-bs.saveImage(data_bin, "Bin.png", verbose=True)
-bs.saveImage(data_dil, "Bin.png", verbose=True)
-bs.saveImage(data_er, "Bin.png", verbose=True)

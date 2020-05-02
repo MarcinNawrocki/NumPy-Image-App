@@ -74,17 +74,3 @@ def gammaCorrection(np_image_2D, gamma):
     np_image_gamma = np_image_gamma.astype(np.uint8)
     return np_image_gamma
 
-"""
-data = bs.readImage("Lena-gray.png", verbose=True)
-data_gamma = gammaCorrection(data, 2.2)
-data_gamma2 = gammaCorrection(data,0.1)
-bs.saveImage(data_gamma, "Bin.png", verbose=True)
-bs.saveImage(data_gamma2, "Bin.png", verbose=True)
-"""
-"""
-data = bs.readImage("Lena-gray.png", verbose=True)
-#np_mask = np.ones((3,3), dtype = np.uint8)
-np_mask = np.array([-1,-1,-1,-1,8,-1,-1,-1,-1]).reshape(3,3)
-data_fil = matrixFilter(data, np_mask)
-bs.saveImage(data_fil, "Bin.png", verbose=True)
-"""

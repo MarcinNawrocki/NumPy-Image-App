@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 #from skimage import exposure
 
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
-def readImage(filename, verbose=False):
+def readImage(filename, verbose=True):
     """Reading image from file and transform it to NumPy array
 
     Keyword argument:
@@ -25,15 +25,16 @@ def readImage(filename, verbose=False):
         pil_image.show()
 
     np_image = np.array(pil_image, dtype=np.uint8)
-    if np_image.shape[2] == 3:
-        if np.array_equiv(np_image[:,:,0],np_image[:,:,1]) and np.array_equiv(np_image[:,:,2],np_image[:,:,1]):
-            np_image = np_image[:,:,0]
-            np_image = grayTo2D(np_image)
+    if len(np_image.shape) == 3:
+        if np_image.shape[2] == 3:
+            if np.array_equiv(np_image[:,:,0],np_image[:,:,1]) and np.array_equiv(np_image[:,:,2],np_image[:,:,1]):
+                np_image = np_image[:,:,0]
+                np_image = grayTo2D(np_image)
     np_image.setflags(write=1)
     #print(filters.threshold_otsu(np_image))
     return np_image
 
-def saveImage(np_image, filename, verbose=False):
+def saveImage(np_image, filename, verbose=True):
     """Saving image to file
 
     Keyword argument:
@@ -113,29 +114,30 @@ def getImageColorType(np_image):
         return 'L'
     #tutaj jakaś obsługa błędów
 
-def getBasicImageParameters(pil_image):
-    """Return basic image parameters as dictionary with info about Resolution, format and mode
-
-    Keyword argument:
-    pil_image -- image as PIL object
-    Return:
-        Python dictionary with keys: Resolution, Format, Mode 
-    """
-
-    return {"Resolution" : image.size, "Format": image.format, 'Mode': image.mode}
-
-def getMinMaxPix(np_image_2dim):
+def getMinMaxPix(np_image):
     """Return  dictionary with max and min pixel value
 
     Keyword argument:
-    np_image -- image as 2D NumPy array(whole grayscale or one color channel)
+    np_image -- image as NumPy array
     Return:
         Python dictionary with keys: Max value, Min value 
     """
 
-    return {"Max value" : np.amax(np_image_2dim), "Min value" : np.amin(np_image_2dmin)}
+    parameters = {}
 
-def getStatisticImageParameters(np_image_2dim):
+    if isColorImage(np_image):
+        parameters['R_Max_value'] = np.amax(np_image[:,:,0])
+        parameters['R_Min_Value'] = np.amin(np_image[:,:,0])
+        parameters['G_Max_value'] = np.amax(np_image[:,:,1])
+        parameters['G_Min_Value'] = np.amin(np_image[:,:,1])
+        parameters['B_Max_value'] = np.amax(np_image[:,:,2])
+        parameters['B_Min_Value'] = np.amin(np_image[:,:,2])
+    else: 
+        parameters = {"Max_value" : np.amax(np_image), "Min value" : np.amin(np_image)}
+
+    return parameters
+
+def getStatisticImageParameters(np_image):
     """Return statistical image parameters as dictionary(Variance, Standard devation, Median, Average)
 
     Keyword argument:
@@ -143,9 +145,28 @@ def getStatisticImageParameters(np_image_2dim):
     Return:
         Python dictionary with keys: Variance, Standard devation, Median, Average 
     """
+    parameters = {}
+    if isColorImage(np_image):
+        parameters['R_Variance'] = np.var(np_image[:,:,0])
+        parameters['R_Standard_devation'] = np.std(np_image[:,:,0])
+        parameters['R_Median'] = np.median(np_image[:,:,0])
+        parameters['R_Average'] = np.average(np_image[:,:,0])
+        parameters['G_Variance'] = np.var(np_image[:,:,1])
+        parameters['G_Standard_devation'] = np.std(np_image[:,:,1])
+        parameters['G_Median'] = np.median(np_image[:,:,1])
+        parameters['G_Average'] = np.average(np_image[:,:,1])
+        parameters['B_Variance'] = np.var(np_image[:,:,2])
+        parameters['B_Standard_devation'] = np.std(np_image[:,:,2])
+        parameters['B_Median'] = np.median(np_image[:,:,2])
+        parameters['B_Average'] = np.average(np_image[:,:,2])
 
-    return {'Variance' : np.var(np_image_2dim), 'Standard devation' : np.std(np_image_2dim), "Median" : np.median(np_image_2dim), "Average" : np.average(np_image_2dim)}
 
+    else: 
+        parameters = {'Variance' : np.var(np_image), 'Standard_devation' : np.std(np_image), 
+        "Median" : np.median(np_image), "Average" : np.average(np_image)}
+
+    return parameters
+    
 def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
     """ Return histogram for image in 2D Numpy array(grayscale or single channel)
     Keyword argument:
@@ -154,23 +175,24 @@ def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
     with_bins -- return also bins as numpy arra(default= False)
     Return:
     histogram as NumPy array,
-    bins ans NumPy array if with_bins = True
+    bins as NumPy array if with_bins = True
 
     """
     np_image_2dim = np_image_2dim.ravel()
     np_hist =  np.histogram(np_image_2dim.ravel(), bins=range(257))[0]
+    np_hist = np_hist.astype(np.uint8)
     #np_hist, bin_edges =  _bincount_histogram(image, source_range)
 
     if normalize:
         np_hist = np_hist / np.sum(hist)
+        
     if with_bins:
-        #np_hist[:10] = np.zeros(10)
-        np_bins = np.nonzero(np_hist)
-        np_bins = np_bins[0]
-        min_edge = np_bins[0]
-        max_edge = np_bins[-1]
+        np_nonzero = np.nonzero(np_hist)
+        np_nonzero = np_nonzero[0]
+        min_edge = np_nonzero[0]
+        max_edge = np_nonzero[-1]
+        np_bins = np.arange(min_edge, max_edge+1, 1, dtype = np.uint8)
         np_hist = np_hist[min_edge:max_edge+1]
-
         return np_hist, np_bins
     else:
         return np_hist
@@ -184,16 +206,21 @@ def ensureGrayscale(np_image):
     np_image as grayscale
     """
     if len(np_image.shape) == 3:
-        np_image = getMachineGrayscale(np_image)
+        if np_image.shape[2] == 3:
+            np_image = getHumanGrayscale(np_image)
     
     return np_image
 
-def grayTo3D(np_image):
+def ensure3D(np_image):
     """
-    Reshaping np_image grayscale image to 3 dimension 
+    Ensures that given image is 3 dimensional. If is 2D(grayscale) change to 3D(this operation do not changes information in image)
     e.g np_image with shape(x,y) will be reshaping to (x,y,1)
     """
-    return np_image.reshape((np_image.shape[0], np_image.shape[1],1))
+
+    if(len(np_image.shape) == 2):
+        return np_image.reshape((np_image.shape[0], np_image.shape[1],1))
+    else:
+        return np_image
 
 def grayTo2D(np_image):
     """
@@ -201,6 +228,14 @@ def grayTo2D(np_image):
     e.g np_image with shape(x,y,1) will be reshaping to (x,y)
     """
     return np_image.reshape((np_image.shape[0], np_image.shape[1]))
+
+def isColorImage(np_image):
+
+    if len(np_image.shape) == 3:
+        if np_image.shape[2] == 3:
+            return True
+    
+    return False
 
 def getWindow(np_image_bin, index, dir_size,  struct_elem):
     """Get window for morphological and filtering  operations
@@ -231,15 +266,20 @@ def getWindow(np_image_bin, index, dir_size,  struct_elem):
         pass
 
     return np_window
-#pętla przez wszystkie piksele
-#for xy in np.ndindex(data.shape[:2]):
-  # print(str(data[xy])+", " + str(data[xy]))
 
-data = readImage("Lena-gray.png", verbose=True)
-data = grayTo3D(data)
-saveImage(data, "Bin.png", verbose=True)
+def convert(o):
+    """
+    Convert function, needed to dump numpy datatypes into JSON file
+    """
+    if isinstance(o, np.uint8): return int(o)  
+    if isinstance(o, uint8): return int(o)
+    raise TypeError
 #TODO:
-    #filtering test
     #implementing errors catching
+#TODO function to use in api:
+    #4 or 16 and vertically
+    #static parameters (numbers of possible splits, parameters to specified operations)
+    #available numbers of splits to specified operations(list where first parameters is operations that could give 
+    #functions that "glue" images together 
 
     
