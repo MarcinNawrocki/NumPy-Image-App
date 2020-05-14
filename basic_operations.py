@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 #from skimage import filters
 #from skimage import exposure
 
+
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
 def readImage(filename, verbose=True):
     """Reading image from file and transform it to NumPy array
@@ -197,7 +198,7 @@ def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
     else:
         return np_hist
 
-def ensureGrayscale(np_image):
+def ensureGrayscale(np_image, info=False):
     """Ensures that given image is in grayscale
 
     Keyword argument:
@@ -205,11 +206,16 @@ def ensureGrayscale(np_image):
     Return:
     np_image as grayscale
     """
+    isConverted = False
     if len(np_image.shape) == 3:
         if np_image.shape[2] == 3:
             np_image = getHumanGrayscale(np_image)
+            isConverted = True
     
-    return np_image
+    if info:
+        return (np_image, isConverted )
+    else:
+        return np_image
 
 def ensure3D(np_image):
     """
@@ -267,6 +273,55 @@ def getWindow(np_image_bin, index, dir_size,  struct_elem):
 
     return np_window
 
+#splitting image
+def splitImage(np_image, number_of_parts):
+    """
+    Splitting image as 2-dimensional numpy array into array of parts.
+    Keyword argument:
+    np_image -- image to split, works for 2D and 3D images
+    number_of_parts -- number of parts to split image
+    Return
+    np_split -- list of numpy array f.e:
+        1,2,3,4 is parts of image as numpy array, function return list [1,2,3,4]
+    """
+
+    if np_image.shape[0] % number_of_parts == 0:
+        splitted = np.split(np_image, number_of_parts, axis=0)
+    else:
+        step = int(np_image.shape[0] / number_of_parts)
+        max_equal_step = step*(number_of_parts-1)
+        splitted = np.split(np_image[:max_equal_step], number_of_parts-1)
+        splitted.append(np_image[max_equal_step:])
+        
+        #splitted = np.array_split(np_image, number_of_parts,axis=0)
+    return splitted
+
+def glueImage(splitted):
+    """
+    Glued vertically splitted images into one image.
+    Keyword argument:
+    splitted -- list of images as numpy arrays
+    Return
+    np_glued -- new, glued image as numpy array
+
+    """
+
+    np_glued = np.vstack(tuple(splitted))
+    return np_glued
+
+def generateInterImages(np_source, np_final, number_of_parts):
+    """
+    """
+
+    splitted_source = splitImage(np_source, number_of_parts)
+    splitted_final = splitImage(np_final, number_of_parts)
+
+    actual_image = splitted_source.copy()
+    for i in range(number_of_parts):
+        actual_image[i] = splitted_final[i]
+        #generate names
+        saveImage(glueImage(actual_image), "xxxx")
+
 def convert(o):
     """
     Convert function, needed to dump numpy datatypes into JSON file
@@ -274,12 +329,11 @@ def convert(o):
     if isinstance(o, np.uint8): return int(o)  
     if isinstance(o, uint8): return int(o)
     raise TypeError
+
+
+
 #TODO:
     #implementing errors catching
-#TODO function to use in api:
-    #4 or 16 and vertically
-    #static parameters (numbers of possible splits, parameters to specified operations)
-    #available numbers of splits to specified operations(list where first parameters is operations that could give 
-    #functions that "glue" images together 
+
 
     
