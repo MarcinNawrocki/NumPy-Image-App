@@ -20,6 +20,8 @@ np_HP1 = np.array([[0,-1,0],[-1,5,-1], [0,-1,0]])
 np_HP2 = np.array([[1,-2,1],[-2,5,-2], [1,-2,1]])
 np_HP3 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 
+defaultImagePath = "public/python/images/"
+
 #add more from
 #http://www.algorytm.org/przetwarzanie-obrazow/filtrowanie-obrazow.html
 
@@ -58,7 +60,7 @@ def getImageParameters(filename):
     #error catching
     #print(json.dumps(parameters, default=convert))
 
-    with open('data_color.json', 'w') as fp:
+    with open('public/python/data/data_color.json', 'w') as fp:
         json.dump(parameters, fp, default=bs.convert)
 
 def toGrayscale(filename, gray="human"):
@@ -109,7 +111,7 @@ def getBinaryzedImage(filename, threshold, number_of_inters=1): #tested
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
-        bs.saveImage(np_image_2D, "xxxxx")
+        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
         number_of_inters -= 1
     np_final = bn.thresholdBinaryzation(np_image_2D, threshold)
 
@@ -132,7 +134,7 @@ def getOtsuBinaryzedImage(filename, number_of_inters=1):#tested, read about imag
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
-        bs.saveImage(np_image_2D, "xxxxx")
+        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
         number_of_inters -= 1
     #print(filters.threshold_otsu(np_image_2D))
     np_final = bn.otsuBinaryzation(np_image_2D)
@@ -160,7 +162,7 @@ def getDilate(filename, struct_elem='rect', size=3,  number_of_inters=3): #teste
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
-        bs.saveImage(np_image_2D, "xxxxx")
+        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
         number_of_inters -= 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
     bs.saveImage(np_image_bin, filename)
@@ -190,7 +192,7 @@ def getErode(filename, struct_elem='cross', size=3, number_of_inters=3): #tested
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
-        bs.saveImage(np_image_2D, "xxxxx")
+        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
         number_of_inters -= 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
     bs.saveImage(np_image_bin, filename)
@@ -219,7 +221,7 @@ def getOpenly(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
-        bs.saveImage(np_image_2D, "xxxxx")
+        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
         number_of_inters -= 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
     bs.saveImage(np_image_bin, filename)
@@ -253,7 +255,7 @@ def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Teste
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
-        bs.saveImage(np_image_2D, "xxxxx")
+        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
         number_of_inters -= 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
     bs.saveImage(np_image_bin, filename)

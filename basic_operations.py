@@ -6,10 +6,12 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import pathlib
+
 #from skimage import data
 #from skimage import filters
 #from skimage import exposure
 
+defaultImagePath = "public/python/images/"
 
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
 def readImage(filename, verbose=True):
@@ -59,7 +61,7 @@ def saveImage(np_image, filename, verbose=True):
     pil_image = Image.fromarray(np_image, mode=mode)
     if verbose:
         pil_image.show()
-    pil_image.save(filename)
+    pil_image.save(defaultImagePath + "1.png")
     #return coś o powodzeniu operacji
 
 def getHumanGrayscale(np_image):
@@ -321,7 +323,7 @@ def generateInterImages(np_source, np_final, number_of_parts):
     for i in range(number_of_parts):
         actual_image[i] = splitted_final[i]
         #generate names
-        saveImage(glueImage(actual_image), "public/python/images/1.png")
+        saveImage(glueImage(actual_image), defaultImagePath + "1.png")
 
 def convert(o):
     """
