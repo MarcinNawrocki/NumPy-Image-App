@@ -1,9 +1,11 @@
 #To activate env in cmd type in workspace directory:
 #ImageApp\Scripts\activate
+import sys
 import time
 import numpy as np 
 from PIL import Image
 import matplotlib.pyplot as plt
+import pathlib
 #from skimage import data
 #from skimage import filters
 #from skimage import exposure
@@ -57,7 +59,7 @@ def saveImage(np_image, filename, verbose=True):
     pil_image = Image.fromarray(np_image, mode=mode)
     if verbose:
         pil_image.show()
-    #pil_image.save(filename)
+    pil_image.save(filename)
     #return coś o powodzeniu operacji
 
 def getHumanGrayscale(np_image):
@@ -312,7 +314,6 @@ def glueImage(splitted):
 def generateInterImages(np_source, np_final, number_of_parts):
     """
     """
-
     splitted_source = splitImage(np_source, number_of_parts)
     splitted_final = splitImage(np_final, number_of_parts)
 
@@ -320,7 +321,7 @@ def generateInterImages(np_source, np_final, number_of_parts):
     for i in range(number_of_parts):
         actual_image[i] = splitted_final[i]
         #generate names
-        saveImage(glueImage(actual_image), "xxxx")
+        saveImage(glueImage(actual_image), "public/python/images/1.png")
 
 def convert(o):
     """

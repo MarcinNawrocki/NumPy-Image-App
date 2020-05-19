@@ -1,9 +1,9 @@
+import sys
 import basic_operations as bs 
 import binary_operations as bn 
 import noising as ns 
 import filtering as fil 
 import json
-
 import numpy as np
 from skimage import filters
 
@@ -18,7 +18,7 @@ np_LP3 = np.array([[1,1,1],[1,12,1], [1,1,1]])
 np_HP = np.array([[-1,-1,-1],[-1,9,-1], [-1,-1,-1]])
 np_HP1 = np.array([[0,-1,0],[-1,5,-1], [0,-1,0]])
 np_HP2 = np.array([[1,-2,1],[-2,5,-2], [1,-2,1]])
-np_HP2 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
+np_HP3 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 
 #add more from
 #http://www.algorytm.org/przetwarzanie-obrazow/filtrowanie-obrazow.html
@@ -392,6 +392,36 @@ def addSaltPepperNoise(filename, propability = 0.05, saltPepperRatio = 0.5, numb
     bs.generateInterImages(np_image, np_final, number_of_inters)
 
 
-addSaltPepperNoise("Lena.png", number_of_inters=4)
+#addSaltPepperNoise("Lena.png", number_of_inters=4)
 
+if __name__ == "__main__":
 
+    functions = {
+        'getImageParameters': getImageParameters,
+        'toGrayscale': toGrayscale,
+        'getBinaryzedImage': getBinaryzedImage,
+        'getOtsuBinaryzedImage': getOtsuBinaryzedImage,
+        'getDilate': getDilate,
+        'getErode': getErode,
+        'getOpenly': getOpenly,
+        'getClosely': getClosely,
+        'filteringImage': filteringImage,
+        'medianFiltergingImage': medianFiltergingImage,
+        'gammaCorrection': gammaCorrection,
+        'addGaussianNoise': addGaussianNoise,
+        'addSaltPepperNoise': addSaltPepperNoise,
+    }
+
+    option = sys.argv[1]
+    parameters = sys.argv[2:]
+
+    for i in range(len(parameters)):
+        try:
+            parameters[i] = int(parameters[i])
+        except ValueError:
+            try:
+                parameters[i] = float(parameters[i])
+            except ValueError:
+                continue
+
+    functions[option](*parameters)
