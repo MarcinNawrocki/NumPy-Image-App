@@ -6,6 +6,7 @@ import filtering as fil
 import json
 import numpy as np
 from skimage import filters
+import os
 
 #filters
 #dolnoprzepustowe
@@ -20,7 +21,12 @@ np_HP1 = np.array([[0,-1,0],[-1,5,-1], [0,-1,0]])
 np_HP2 = np.array([[1,-2,1],[-2,5,-2], [1,-2,1]])
 np_HP3 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 
-defaultImagePath = "public/python/images/"
+defaultImagePath = "./public/python/images/"
+#create path if not exist 
+if not(os.path.exists(defaultImagePath)):
+    print("tworzenie folderów")
+    os.makedirs(defaultImagePath)
+
 
 #add more from
 #http://www.algorytm.org/przetwarzanie-obrazow/filtrowanie-obrazow.html
@@ -393,9 +399,10 @@ def addSaltPepperNoise(filename, propability = 0.05, saltPepperRatio = 0.5, numb
     bs.generateInterImages(np_image, np_final, number_of_inters)
 
 
-#addSaltPepperNoise("Lena.png", number_of_inters=4)
 
 if __name__ == "__main__":
+    print("main")
+
 
     functions = {
         'getImageParameters': getImageParameters,
@@ -424,5 +431,5 @@ if __name__ == "__main__":
                 parameters[i] = float(parameters[i])
             except ValueError:
                 continue
-
-    functions[option](*parameters)
+    if len(sys.argv) >=1:
+        functions[option](*parameters)

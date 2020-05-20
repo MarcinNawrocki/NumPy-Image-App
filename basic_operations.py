@@ -11,7 +11,7 @@ import pathlib
 #from skimage import filters
 #from skimage import exposure
 
-defaultImagePath = "public/python/images/"
+#defaultImagePath = "public/python/images/"
 
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
 def readImage(filename, verbose=True):
@@ -44,7 +44,7 @@ def saveImage(np_image, filename, verbose=True):
 
     Keyword argument:
     np_image -- image as NumPy array
-    filename -- relative to where image should be saved
+    filename -- relative to where image should be saved with filename conatining extension 
     verbose -- if true showing image(default False)
 
     Return:
@@ -61,7 +61,7 @@ def saveImage(np_image, filename, verbose=True):
     pil_image = Image.fromarray(np_image, mode=mode)
     if verbose:
         pil_image.show()
-    pil_image.save(defaultImagePath + "1.png")
+    pil_image.save(filename)
     #return coś o powodzeniu operacji
 
 def getHumanGrayscale(np_image):
@@ -313,17 +313,19 @@ def glueImage(splitted):
     np_glued = np.vstack(tuple(splitted))
     return np_glued
 
-def generateInterImages(np_source, np_final, number_of_parts):
+def generateInterImages(np_source, np_final, number_of_parts, defaultImagePath= "./public/python/images/"):
     """
     """
     splitted_source = splitImage(np_source, number_of_parts)
     splitted_final = splitImage(np_final, number_of_parts)
 
     actual_image = splitted_source.copy()
+    extension = ".png"
     for i in range(number_of_parts):
         actual_image[i] = splitted_final[i]
-        #generate names
-        saveImage(glueImage(actual_image), defaultImagePath + "1.png")
+        number = str(i)
+        #add default image paths
+        saveImage(glueImage(actual_image), defaultImagePath + number + extension)
 
 def convert(o):
     """
@@ -336,7 +338,6 @@ def convert(o):
 
 
 #TODO:
-    #generating filenames
     #handling to small number of inters
 
     
