@@ -328,7 +328,6 @@ def medianFiltergingImage(filename, struct_elem='rect', size=3, number_of_inters
     #filenames
     bs.generateInterImages(np_image, np_final, number_of_inters)
 
-
 def gammaCorrection(filename, gamma, number_of_inters=1): #Tested
     """
     Processing gamma correction with specified gamma correction atribute

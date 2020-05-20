@@ -336,7 +336,7 @@ def convert(o):
 
 
 #TODO:
-    #implementing errors catching
-
+    #generating filenames
+    #handling to small number of inters
 
     
