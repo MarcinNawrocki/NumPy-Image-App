@@ -11,7 +11,7 @@ import pathlib
 #from skimage import filters
 #from skimage import exposure
 
-#defaultImagePath = "public/python/images/"
+#defaultImagePath = "express-app/public/python/images/"
 
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
 def readImage(filename, verbose=True):
@@ -313,7 +313,7 @@ def glueImage(splitted):
     np_glued = np.vstack(tuple(splitted))
     return np_glued
 
-def generateInterImages(np_source, np_final, number_of_parts, defaultImagePath= "./public/python/images/"):
+def generateInterImages(np_source, np_final, number_of_parts, defaultImagePath= "./express-app/public/python/images/"):
     """
     """
     splitted_source = splitImage(np_source, number_of_parts)

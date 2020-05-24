@@ -21,7 +21,7 @@ np_HP1 = np.array([[0,-1,0],[-1,5,-1], [0,-1,0]])
 np_HP2 = np.array([[1,-2,1],[-2,5,-2], [1,-2,1]])
 np_HP3 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 
-defaultImagePath = "./public/python/images/"
+defaultImagePath = "./express-app/public/python/images/"
 #create path if not exist 
 if not(os.path.exists(defaultImagePath)):
     print("tworzenie folderów")
