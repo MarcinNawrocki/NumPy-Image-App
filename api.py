@@ -10,16 +10,16 @@ import os
 
 #filters
 #dolnoprzepustowe
-np_LP = np.array([[1,1,1],[1,1,1], [1,1,1]])
-np_LP1 = np.array([[1,1,1],[1,2,1], [1,1,1]])
-np_LP2 = np.array([[1,1,1],[1,4,1], [1,1,1]])
-np_LP3 = np.array([[1,1,1],[1,12,1], [1,1,1]])
+np_LP1 = np.array([[1,1,1],[1,1,1], [1,1,1]])
+np_LP2 = np.array([[1,1,1],[1,2,1], [1,1,1]])
+np_LP3 = np.array([[1,1,1],[1,4,1], [1,1,1]])
+np_LP4 = np.array([[1,1,1],[1,12,1], [1,1,1]])
 
 #górnoprzepustowe
-np_HP = np.array([[-1,-1,-1],[-1,9,-1], [-1,-1,-1]])
-np_HP1 = np.array([[0,-1,0],[-1,5,-1], [0,-1,0]])
-np_HP2 = np.array([[1,-2,1],[-2,5,-2], [1,-2,1]])
-np_HP3 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
+np_HP1 = np.array([[-1,-1,-1],[-1,9,-1], [-1,-1,-1]])
+np_HP2 = np.array([[0,-1,0],[-1,5,-1], [0,-1,0]])
+np_HP3 = np.array([[1,-2,1],[-2,5,-2], [1,-2,1]])
+np_HP4 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 
 defaultImagePath = "./express-app/public/python/images/"
 #create path if not exist 
@@ -289,6 +289,23 @@ def filteringImage(filename, np_mask, number_of_inters=1): #Tested
     Return:
         1 if operation was succesful.
     """
+    
+    if np_mask == 'LP1'
+        np_mask = np_LP1;
+    elif np_mask == 'LP2'
+        np_mask = np_LP2;
+    elif np_mask == 'LP3'
+        np_mask = np_LP3;
+    elif np_mask == 'LP4'
+        np_mask = np_LP4;
+    elif np_mask == 'HP1'
+        np_mask = np_HP1;
+    elif np_mask == 'HP2'
+        np_mask = np_HP2;
+    elif np_mask == 'HP3'
+        np_mask = np_HP3;
+    else np_mask = np_HP4;
+        
     np_image = bs.readImage(filename)   
 
     if bs.isColorImage(np_image):
