@@ -277,7 +277,7 @@ def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Teste
     #filenames
     bs.generateInterImages(np_image_dil, np_final, number_of_inters)
 
-def filteringImage(filename, np_mask, number_of_inters=1): #Tested
+def filteringImage(filename, np_mask_pom, number_of_inters=1): #Tested
     """
     Processing filtering with given kernel.
     If RGB image is passed, then each channel will be filter separately.
@@ -290,21 +290,21 @@ def filteringImage(filename, np_mask, number_of_inters=1): #Tested
         1 if operation was succesful.
     """
     
-    if np_mask == 'LP1'
+    if np_mask_pom == 'LP1':
         np_mask = np_LP1;
-    elif np_mask == 'LP2'
+    elif np_mask_pom == 'LP2':
         np_mask = np_LP2;
-    elif np_mask == 'LP3'
+    elif np_mask_pom == 'LP3':
         np_mask = np_LP3;
-    elif np_mask == 'LP4'
+    elif np_mask_pom == 'LP4':
         np_mask = np_LP4;
-    elif np_mask == 'HP1'
+    elif np_mask_pom == 'HP1':
         np_mask = np_HP1;
-    elif np_mask == 'HP2'
+    elif np_mask_pom == 'HP2':
         np_mask = np_HP2;
-    elif np_mask == 'HP3'
+    elif np_mask_pom == 'HP3':
         np_mask = np_HP3;
-    else np_mask = np_HP4;
+    else: np_mask = np_HP4;
         
     np_image = bs.readImage(filename)   
 
