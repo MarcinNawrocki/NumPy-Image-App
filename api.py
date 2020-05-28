@@ -7,6 +7,7 @@ import json
 import numpy as np
 from skimage import filters
 import os
+import shutil
 
 #filters
 #dolnoprzepustowe
@@ -21,7 +22,7 @@ np_HP2 = np.array([[0,-1,0],[-1,5,-1], [0,-1,0]])
 np_HP3 = np.array([[1,-2,1],[-2,5,-2], [1,-2,1]])
 np_HP4 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 
-defaultImagePath = "./express-app/public/python/images/"
+defaultImagePath = "./public/python/images/"
 #create path if not exist 
 if not(os.path.exists(defaultImagePath)):
     print("tworzenie folderów")
@@ -34,7 +35,7 @@ if not(os.path.exists(defaultImagePath)):
 #image parameters
 
 
-def getImageParameters(filename):
+def getImageParameters(filename, save_source=True, defaultImagePath= "./public/python/images/"):
     """Reading image from file and save parameters in the json file
 
     Keyword argument:
@@ -45,6 +46,9 @@ def getImageParameters(filename):
     """
 
     np_image = bs.readImage(filename)
+    if save_source:
+        extension = ".png"
+        bs.saveImage(np_image, defaultImagePath + '0' + extension)
 
     parameters = {}
     parameters['Type'] = bs.getImageColorType(np_image)
@@ -82,7 +86,7 @@ def toGrayscale(filename, gray="human"):
     Important:
     !!! This operation reducing Array dimension from 3 to 2 !!!
     """
-
+    getImageParameters(filename)
     np_image = bs.readImage(filename)
     #isRGB?
     if bs.isColorImage(np_image):
@@ -96,7 +100,8 @@ def toGrayscale(filename, gray="human"):
     else:
         np_final = np_image
 
-    bs.saveImage(np_final, filename)
+    #bs.saveImage(np_final, filename)
+    bs.generateInterImages(np_image, np_final, 1)
     return 1
 
 def getBinaryzedImage(filename, threshold, number_of_inters=1): #tested
@@ -111,6 +116,7 @@ def getBinaryzedImage(filename, threshold, number_of_inters=1): #tested
         0 if threshold is out of range
     """
 
+    getImageParameters(filename)
     if threshold > 255 or threshold < 0:
         return 0
     
@@ -137,6 +143,7 @@ def getOtsuBinaryzedImage(filename, number_of_inters=1):#tested, read about imag
         1 if operation was succesful.
     """
 
+    getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
@@ -165,6 +172,7 @@ def getDilate(filename, struct_elem='rect', size=3,  number_of_inters=3): #teste
         1 if operation was succesful.
     """
 
+    getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
@@ -195,6 +203,7 @@ def getErode(filename, struct_elem='cross', size=3, number_of_inters=3): #tested
         1 if operation was succesful.
     """
     
+    getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
@@ -224,6 +233,7 @@ def getOpenly(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
         1 if operation was succesful.
     """
 
+    getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
@@ -258,6 +268,7 @@ def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Teste
         1 if operation was succesful.
     """
 
+    getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
@@ -290,6 +301,7 @@ def filteringImage(filename, np_mask_pom, number_of_inters=1): #Tested
         1 if operation was succesful.
     """
     
+    getImageParameters(filename)
     if np_mask_pom == 'LP1':
         np_mask = np_LP1;
     elif np_mask_pom == 'LP2':
@@ -336,6 +348,7 @@ def medianFiltergingImage(filename, struct_elem='rect', size=3, number_of_inters
         1 if operation was succesful. 
     """
 
+    getImageParameters(filename)
     np_image = bs.readImage(filename)  
     np_image = ns.saltPepperNoising(np_image)
     bs.saveImage(np_image, filename)
@@ -362,6 +375,8 @@ def gammaCorrection(filename, gamma, number_of_inters=1): #Tested
     Return:
         1 if operation was succesful. 
     """
+    
+    getImageParameters(filename)
     np_image = bs.readImage(filename)  
 
     if bs.isColorImage(np_image):
@@ -387,6 +402,7 @@ def addGaussianNoise(filename, std_dev=0.05, mean=0, number_of_inters=1): #Grays
         1 if operation was succesful. 
     """
 
+    getImageParameters(filename)
     np_image = bs.readImage(filename)    
     np_image_3D = bs.ensure3D(np_image)
     np_final = ns.gaussianNoise(np_image_3D, std_dev, mean)
@@ -409,12 +425,25 @@ def addSaltPepperNoise(filename, propability = 0.05, saltPepperRatio = 0.5, numb
         1 if operation was succesful. 
     """
 
+    getImageParameters(filename)
     np_image = bs.readImage(filename)  
     np_final =  ns.saltPepperNoising(np_image, propability, saltPepperRatio)
 
     #filenames
     bs.generateInterImages(np_image, np_final, number_of_inters)
-
+    
+def removeFiles():   
+    folder = "./public/python/images"
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    return 1
 
 
 if __name__ == "__main__":
@@ -435,6 +464,7 @@ if __name__ == "__main__":
         'gammaCorrection': gammaCorrection,
         'addGaussianNoise': addGaussianNoise,
         'addSaltPepperNoise': addSaltPepperNoise,
+        'removeFiles': removeFiles
     }
 
     option = sys.argv[1]

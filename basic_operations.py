@@ -62,6 +62,7 @@ def saveImage(np_image, filename, verbose=True):
     if verbose:
         pil_image.show()
     pil_image.save(filename)
+    #pil_image.save("./public/python/images/0.png")
     #return coś o powodzeniu operacji
 
 def getHumanGrayscale(np_image):
@@ -313,7 +314,7 @@ def glueImage(splitted):
     np_glued = np.vstack(tuple(splitted))
     return np_glued
 
-def generateInterImages(np_source, np_final, number_of_parts, defaultImagePath= "./express-app/public/python/images/"):
+def generateInterImages(np_source, np_final, number_of_parts, defaultImagePath= "./public/python/images/"):
     """
     """
     splitted_source = splitImage(np_source, number_of_parts)
@@ -323,7 +324,7 @@ def generateInterImages(np_source, np_final, number_of_parts, defaultImagePath= 
     extension = ".png"
     for i in range(number_of_parts):
         actual_image[i] = splitted_final[i]
-        number = str(i)
+        number = str(i+1)
         #add default image paths
         saveImage(glueImage(actual_image), defaultImagePath + number + extension)
 
