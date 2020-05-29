@@ -26,8 +26,8 @@ def readImage(filename, verbose=True):
     """
 
     pil_image = Image.open(filename)
-    if verbose:
-        pil_image.show()
+    #if verbose:
+        #pil_image.show()
 
     np_image = np.array(pil_image, dtype=np.uint8)
     if len(np_image.shape) == 3:
@@ -59,8 +59,8 @@ def saveImage(np_image, filename, verbose=True):
         mode = getImageColorType(np_image)
 
     pil_image = Image.fromarray(np_image, mode=mode)
-    if verbose:
-        pil_image.show()
+    #if verbose:
+        #pil_image.show()
     pil_image.save(filename)
     #pil_image.save("./public/python/images/0.png")
     #return coś o powodzeniu operacji
@@ -139,7 +139,7 @@ def getMinMaxPix(np_image):
         parameters['B_Max_value'] = np.amax(np_image[:,:,2])
         parameters['B_Min_Value'] = np.amin(np_image[:,:,2])
     else: 
-        parameters = {"Max_value" : np.amax(np_image), "Min value" : np.amin(np_image)}
+        parameters = {"Max_value" : np.amax(np_image), "Min_value" : np.amin(np_image)}
 
     return parameters
 

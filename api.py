@@ -45,6 +45,7 @@ def getImageParameters(filename, save_source=True, defaultImagePath= "./public/p
     image as Numpy Array
     """
 
+    #removeFiles()
     np_image = bs.readImage(filename)
     if save_source:
         extension = ".png"
