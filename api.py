@@ -51,6 +51,10 @@ def getImageParameters(filename, save_source=True, defaultImagePath= "./public/p
         extension = ".png"
         bs.saveImage(np_image, defaultImagePath + '0' + extension)
 
+    if save_source:
+        extension = ".png"
+        bs.saveImage(np_image, defaultImagePath + '0' + extension)
+
     parameters = {}
     parameters['Type'] = bs.getImageColorType(np_image)
     parameters['x_res'] = int(np_image.shape[0])
@@ -71,7 +75,8 @@ def getImageParameters(filename, save_source=True, defaultImagePath= "./public/p
     #error catching
     #print(json.dumps(parameters, default=convert))
 
-    with open('public/python/data/data_color.json', 'w') as fp:
+    #ZMIANA W ŚCIEŻCE
+    with open('public/python/images/data_color.json', 'w+') as fp:
         json.dump(parameters, fp, default=bs.convert)
 
 def toGrayscale(filename, gray="human"):
@@ -101,8 +106,7 @@ def toGrayscale(filename, gray="human"):
     else:
         np_final = np_image
 
-    #bs.saveImage(np_final, filename)
-    bs.generateInterImages(np_image, np_final, 1)
+    bs.saveImage(np_final, defaultImagePath+"1.png")
     return 1
 
 def getBinaryzedImage(filename, threshold, number_of_inters=1): #tested
@@ -120,16 +124,16 @@ def getBinaryzedImage(filename, threshold, number_of_inters=1): #tested
     getImageParameters(filename)
     if threshold > 255 or threshold < 0:
         return 0
-    
+    start_image_number = 0
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
         bs.saveImage(np_image_2D, defaultImagePath+"1.png")
-        number_of_inters -= 1
+        start_image_number += 1
     np_final = bn.thresholdBinaryzation(np_image_2D, threshold)
 
    #generate name
-    bs.generateInterImages(np_image_2D, np_final, number_of_inters)
+    bs.generateInterImages(np_image_2D, np_final, number_of_inters, start_image_number)
 
     return 1
 
@@ -147,14 +151,15 @@ def getOtsuBinaryzedImage(filename, number_of_inters=1):#tested, read about imag
     getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
+    start_image_number = 0
     if isConverted:
         bs.saveImage(np_image_2D, defaultImagePath+"1.png")
-        number_of_inters -= 1
+        start_image_number += 1
     #print(filters.threshold_otsu(np_image_2D))
     np_final = bn.otsuBinaryzation(np_image_2D)
 
     #generate names
-    bs.generateInterImages(np_image_2D, np_final, number_of_inters)
+    bs.generateInterImages(np_image_2D, np_final, number_of_inters, start_image_number)
     return 1
 
 def getDilate(filename, struct_elem='rect', size=3,  number_of_inters=3): #tested
@@ -176,16 +181,17 @@ def getDilate(filename, struct_elem='rect', size=3,  number_of_inters=3): #teste
     getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
+    start_image_number = 0
     if isConverted:
         bs.saveImage(np_image_2D, defaultImagePath+"1.png")
-        number_of_inters -= 1
+        start_image_number += 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
-    bs.saveImage(np_image_bin, filename)
-    number_of_inters -= 1
+    bs.saveImage(np_image_bin, defaultImagePath+"1.png")
+    start_image_number += 1
     np_final = bn.dilate(np_image_bin, struct_elem, size)
 
     #generate names
-    bs.generateInterImages(np_image_bin, np_final, number_of_inters)
+    bs.generateInterImages(np_image_bin, np_final, number_of_inters, start_image_number)
     return 1
 
 def getErode(filename, struct_elem='cross', size=3, number_of_inters=3): #tested
@@ -204,19 +210,19 @@ def getErode(filename, struct_elem='cross', size=3, number_of_inters=3): #tested
         1 if operation was succesful.
     """
     
-    getImageParameters(filename)
+    start_image_number = 0
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
         bs.saveImage(np_image_2D, defaultImagePath+"1.png")
-        number_of_inters -= 1
+        start_image_number += 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
-    bs.saveImage(np_image_bin, filename)
-    number_of_inters -= 1
+    bs.saveImage(np_image_bin, defaultImagePath+"2.png")
+    start_image_number += 1
     np_final = bn.erode(np_image_bin, struct_elem, size)
 
     #generate names
-    bs.generateInterImages(np_image_bin, np_final, number_of_inters)
+    bs.generateInterImages(np_image_bin, np_final, number_of_inters, defaultImagePath+"1.png", start_image_number)
 
 def getOpenly(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
     """Execute openly(erode and dilate on the same image) morphological operation on image
@@ -234,24 +240,27 @@ def getOpenly(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
         1 if operation was succesful.
     """
 
-    getImageParameters(filename)
+    start_image_number = 0
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
         bs.saveImage(np_image_2D, defaultImagePath+"1.png")
-        number_of_inters -= 1
+        start_image_number += 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
-    bs.saveImage(np_image_bin, filename)
-    number_of_inters -= 1
-    np_image_er = bn.erode(np_image_bin, struct_elem, size)
-    bs.generateInterImages(np_image_bin, np_image_er, int(number_of_inters/2))
+    bs.saveImage(np_image_bin, defaultImagePath+"2.png")
+    start_image_number += 1
 
+    np_image_er = bn.erode(np_image_bin, struct_elem, size)
+    bs.generateInterImages(np_image_bin, np_image_er, int(number_of_inters/2), int(start_image_number/2))
+
+    start_image_number += int(number_of_inters/2)
     rest = number_of_inters % 2
     number_of_inters = int(number_of_inters/2) + rest
+
     np_final = bn.dilate(np_image_er, struct_elem, size)
 
     #filenames
-    bs.generateInterImages(np_image_er, np_final, number_of_inters)
+    bs.generateInterImages(np_image_er, np_final, number_of_inters, start_image_number)
 
 def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
     """Execute openly(erode and dilate on the same image) morphological operation on image
@@ -269,15 +278,15 @@ def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Teste
         1 if operation was succesful.
     """
 
-    getImageParameters(filename)
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
+    start_image_number = 0
     if isConverted:
         bs.saveImage(np_image_2D, defaultImagePath+"1.png")
-        number_of_inters -= 1
+        start_image_number += 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
-    bs.saveImage(np_image_bin, filename)
-    number_of_inters -= 1
+    bs.saveImage(np_image_bin, defaultImagePath+"2.png")
+    start_image_number += 1
     
     np_image_dil = bn.dilate(np_image_bin, struct_elem, size)
     bs.generateInterImages(np_image_bin, np_image_dil, int(number_of_inters/2))
@@ -287,7 +296,7 @@ def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Teste
     np_final = bn.erode(np_image_dil, struct_elem, size)
 
     #filenames
-    bs.generateInterImages(np_image_dil, np_final, number_of_inters)
+    bs.generateInterImages(np_image_dil, np_final, number_of_inters, start_image_number)
 
 def filteringImage(filename, np_mask_pom, number_of_inters=1): #Tested
     """
@@ -446,6 +455,10 @@ def removeFiles():
             print('Failed to delete %s. Reason: %s' % (file_path, e))
     return 1
 
+#getImageParameters("bin2.jpg")
+getImageParameters("bin2.jpg")
+getClosely("bin2.jpg")
+#getImageParameters("cameraman.png",save_source=False)
 
 if __name__ == "__main__":
     print("main")

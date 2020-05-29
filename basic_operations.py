@@ -14,7 +14,7 @@ import pathlib
 #defaultImagePath = "express-app/public/python/images/"
 
 #dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
-def readImage(filename, verbose=True):
+def readImage(filename, verbose=False):
     """Reading image from file and transform it to NumPy array
 
     Keyword argument:
@@ -36,10 +36,10 @@ def readImage(filename, verbose=True):
                 np_image = np_image[:,:,0]
                 np_image = grayTo2D(np_image)
     np_image.setflags(write=1)
-    #print(filters.threshold_otsu(np_image))
+    
     return np_image
 
-def saveImage(np_image, filename, verbose=True):
+def saveImage(np_image, filename, verbose=False):
     """Saving image to file
 
     Keyword argument:
@@ -314,15 +314,17 @@ def glueImage(splitted):
     np_glued = np.vstack(tuple(splitted))
     return np_glued
 
-def generateInterImages(np_source, np_final, number_of_parts, defaultImagePath= "./public/python/images/"):
+def generateInterImages(np_source, np_final, number_of_parts, start_image_number=0, defaultImagePath= "./public/python/images/"):
     """
     """
+
+    extension = ".png"
     splitted_source = splitImage(np_source, number_of_parts)
     splitted_final = splitImage(np_final, number_of_parts)
 
     actual_image = splitted_source.copy()
-    extension = ".png"
-    for i in range(number_of_parts):
+    
+    for i in range(start_image_number, number_of_parts):
         actual_image[i] = splitted_final[i]
         number = str(i+1)
         #add default image paths
