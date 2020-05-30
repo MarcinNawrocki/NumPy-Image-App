@@ -244,14 +244,14 @@ def getOpenly(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
     np_image = bs.readImage(filename)
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     if isConverted:
-        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
+        bs.saveImage(np_image_2D, defaultImagePath+ str(start_image_number+1)+".png")
         start_image_number += 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
-    bs.saveImage(np_image_bin, defaultImagePath+"2.png")
+    bs.saveImage(np_image_bin, defaultImagePath+str(start_image_number+1)+".png")
     start_image_number += 1
 
     np_image_er = bn.erode(np_image_bin, struct_elem, size)
-    bs.generateInterImages(np_image_bin, np_image_er, int(number_of_inters/2), int(start_image_number/2))
+    bs.generateInterImages(np_image_bin, np_image_er, start_image_number+int(number_of_inters/2)-1, start_image_number)
 
     start_image_number += int(number_of_inters/2)
     rest = number_of_inters % 2
@@ -260,7 +260,7 @@ def getOpenly(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
     np_final = bn.dilate(np_image_er, struct_elem, size)
 
     #filenames
-    bs.generateInterImages(np_image_er, np_final, number_of_inters, start_image_number)
+    bs.generateInterImages(np_image_er, np_final, start_image_number+number_of_inters-1, start_image_number)
 
 def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Tested
     """Execute openly(erode and dilate on the same image) morphological operation on image
@@ -282,21 +282,22 @@ def getClosely(filename, struct_elem='rect', size=3, number_of_inters=4): #Teste
     np_image_2D, isConverted = bs.ensureGrayscale(np_image, info = True)
     start_image_number = 0
     if isConverted:
-        bs.saveImage(np_image_2D, defaultImagePath+"1.png")
+        bs.saveImage(np_image_2D, defaultImagePath+ str(start_image_number+1)+".png")
         start_image_number += 1
     np_image_bin = bn.otsuBinaryzation(np_image_2D)
-    bs.saveImage(np_image_bin, defaultImagePath+"2.png")
-    start_image_number += 1
+    bs.generateInterImages(np_image_bin, np_image_er, start_image_number+int(number_of_inters/2)-1, start_image_number)    start_image_number += 1
     
     np_image_dil = bn.dilate(np_image_bin, struct_elem, size)
-    bs.generateInterImages(np_image_bin, np_image_dil, int(number_of_inters/2))
+    bs.generateInterImages(np_image_bin, np_image_dil, start_image_number+int(number_of_inters/2)-1, start_image_number)
 
+    start_image_number += int(number_of_inters/2)
     rest = number_of_inters % 2
     number_of_inters = int(number_of_inters/2) + rest
+
     np_final = bn.erode(np_image_dil, struct_elem, size)
 
     #filenames
-    bs.generateInterImages(np_image_dil, np_final, number_of_inters, start_image_number)
+    bs.generateInterImages(np_image_dil, np_final, start_image_number+number_of_inters-1, start_image_number)
 
 def filteringImage(filename, np_mask_pom, number_of_inters=1): #Tested
     """
@@ -313,20 +314,23 @@ def filteringImage(filename, np_mask_pom, number_of_inters=1): #Tested
     
     getImageParameters(filename)
     if np_mask_pom == 'LP1':
-        np_mask = np_LP1;
+        np_mask = np_LP1
     elif np_mask_pom == 'LP2':
-        np_mask = np_LP2;
+        np_mask = np_LP2
     elif np_mask_pom == 'LP3':
-        np_mask = np_LP3;
+        np_mask = np_LP3
     elif np_mask_pom == 'LP4':
-        np_mask = np_LP4;
+        np_mask = np_LP4
     elif np_mask_pom == 'HP1':
-        np_mask = np_HP1;
+        np_mask = np_HP1
     elif np_mask_pom == 'HP2':
-        np_mask = np_HP2;
+        np_mask = np_HP2
     elif np_mask_pom == 'HP3':
-        np_mask = np_HP3;
-    else: np_mask = np_HP4;
+        np_mask = np_HP3
+    elif np_mask_pom == 'HP4':
+        np_mask = np_HP3
+    else:
+        np_mask = np.array([[1,1,1], [1,1,1], [1,1,1]])
         
     np_image = bs.readImage(filename)   
 
@@ -455,10 +459,6 @@ def removeFiles():
             print('Failed to delete %s. Reason: %s' % (file_path, e))
     return 1
 
-#getImageParameters("bin2.jpg")
-getImageParameters("bin2.jpg")
-getClosely("bin2.jpg")
-#getImageParameters("cameraman.png",save_source=False)
 
 if __name__ == "__main__":
     print("main")

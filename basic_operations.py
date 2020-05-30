@@ -319,12 +319,12 @@ def generateInterImages(np_source, np_final, number_of_parts, start_image_number
     """
 
     extension = ".png"
-    splitted_source = splitImage(np_source, number_of_parts)
-    splitted_final = splitImage(np_final, number_of_parts)
+    splitted_source = splitImage(np_source, number_of_parts+1)
+    splitted_final = splitImage(np_final, number_of_parts+1)
 
     actual_image = splitted_source.copy()
     
-    for i in range(start_image_number, number_of_parts):
+    for i in range(start_image_number, number_of_parts+1):
         actual_image[i] = splitted_final[i]
         number = str(i+1)
         #add default image paths
