@@ -56,7 +56,7 @@ def saveImage(np_image, filename, verbose=False):
     verbose -- if true showing image(default False)
 
     Return:
-    #TODO Code
+    ---
     """
 
     #tutaj w zależności jest czy obraz czarno biały czy kolorowy różne
@@ -78,6 +78,7 @@ def getHumanGrayscale(np_image):
 
     Keyword argument:
     np_image -- image as NumPy array
+
     Return:
     np_image_gray -- image as grayscale
     Important:
@@ -96,6 +97,7 @@ def getMachineGrayscale(np_image):
 
     Keyword argument:
     np_image -- image as NumPy array
+
     Return:
     np_image_gray -- image as grayscale
     Important:
@@ -183,18 +185,21 @@ def getStatisticImageParameters(np_image):
     
 def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
     """ Return histogram for image in 2D Numpy array(grayscale or single channel)
+
     Keyword argument:
     np_image_2dim -- image as 2D NumPy array(whole grayscale or one color channel)
     normalize -- if set to True histogram values will be normalized(default = False)
     with_bins -- return also bins as numpy arra(default= False)
+
     Return:
-    histogram as NumPy array,
-    bins as NumPy array if with_bins = True
+        histogram as NumPy array,
+        bins as NumPy array if with_bins = True
 
     """
     np_image_2dim = np_image_2dim.ravel()
+    #(np_hist, bins, patches) = plt.hist(np_image.ravel(), bins=256, range=(0.0, 255.0), fc='k', ec='k')
     np_hist =  np.histogram(np_image_2dim.ravel(), bins=range(257))[0]
-    np_hist = np_hist.astype(np.uint8)
+    #np_hist = np_hist.astype(np.uint8)
     #np_hist, bin_edges =  _bincount_histogram(image, source_range)
 
     if normalize:
@@ -217,7 +222,7 @@ def ensureGrayscale(np_image, info=False):
     Keyword argument:
     np_image -- image as NumPy array
     Return:
-    np_image as grayscale
+    np_image as grayscale image
     """
     isConverted = False
     if len(np_image.shape) == 3:
@@ -249,7 +254,11 @@ def grayTo2D(np_image):
     return np_image.reshape((np_image.shape[0], np_image.shape[1]))
 
 def isColorImage(np_image):
-
+    """
+    Check if image is colored (has 3 channels)
+    Return 
+        True if image is colored, false otherwise
+    """
     if len(np_image.shape) == 3:
         if np_image.shape[2] == 3:
             return True
@@ -286,7 +295,6 @@ def getWindow(np_image_bin, index, dir_size,  struct_elem):
 
     return np_window
 
-#splitting image
 def splitImage(np_image, number_of_parts):
     """
     Splitting image as 2-dimensional numpy array into array of parts.
@@ -316,7 +324,6 @@ def glueImage(splitted):
     splitted -- list of images as numpy arrays
     Return
     np_glued -- new, glued image as numpy array
-
     """
 
     np_glued = np.vstack(tuple(splitted))
@@ -324,6 +331,18 @@ def glueImage(splitted):
 
 def generateInterImages(np_source, np_final, number_of_inters, start_image_number=0, defaultImagePath= "./public/python/images/"):
     """
+    Function generates specified number of inter images and final images, then saved them in specified locations,
+    with filenames as numbers. Real number of generated inter images is:
+        number_of_inters - start_image number
+    Additionally final image, will be saved.
+    When number_of_inters == start_image_number, only final image will be saved
+    Keyword argument: 
+    np_source -- based image
+    np_final -- final image
+    number_of_inters -- specified number of inter images
+    start_image_number -- number, which starts saving images
+    defaultImagePath -- path to saving image
+
     """
 
     extension = ".png"
@@ -348,9 +367,3 @@ def convert(o):
     if isinstance(o, uint8): return int(o)
     raise TypeError
 
-
-
-#TODO:
-    #handling to small number of inters
-
-    
