@@ -26,15 +26,23 @@ def readImage(filename, verbose=False):
     """
 
     pil_image = Image.open(filename)
-    #if verbose:
-        #pil_image.show()
+    if verbose:
+        pil_image.show()
 
     np_image = np.array(pil_image, dtype=np.uint8)
+
     if len(np_image.shape) == 3:
         if np_image.shape[2] == 3:
             if np.array_equiv(np_image[:,:,0],np_image[:,:,1]) and np.array_equiv(np_image[:,:,2],np_image[:,:,1]):
                 np_image = np_image[:,:,0]
                 np_image = grayTo2D(np_image)
+    else:
+        #we must convert images which is read as 2 dimensional grayscale images
+        pil_image = Image.open(filename).convert('L')
+        np_image = np.array(pil_image, dtype=np.uint8)
+
+    #plt.imshow(np_image, vmin=0, vmax=255, cmap='gray')
+    #plt.show()
     np_image.setflags(write=1)
     
     return np_image
@@ -59,8 +67,8 @@ def saveImage(np_image, filename, verbose=False):
         mode = getImageColorType(np_image)
 
     pil_image = Image.fromarray(np_image, mode=mode)
-    #if verbose:
-        #pil_image.show()
+    if verbose:
+        pil_image.show()
     pil_image.save(filename)
     #pil_image.save("./public/python/images/0.png")
     #return coś o powodzeniu operacji
@@ -115,7 +123,7 @@ def getImageColorType(np_image):
         if np_image.shape[2] == 3:
             return 'RGB'
         else:
-            return 'xy1'
+            return 'L'
     elif len(np_image.shape) == 2:
         return 'L'
     #tutaj jakaś obsługa błędów
@@ -314,18 +322,20 @@ def glueImage(splitted):
     np_glued = np.vstack(tuple(splitted))
     return np_glued
 
-def generateInterImages(np_source, np_final, number_of_parts, start_image_number=0, defaultImagePath= "./public/python/images/"):
+def generateInterImages(np_source, np_final, number_of_inters, start_image_number=0, defaultImagePath= "./public/python/images/"):
     """
     """
 
     extension = ".png"
-    splitted_source = splitImage(np_source, number_of_parts+1)
-    splitted_final = splitImage(np_final, number_of_parts+1)
+    #calculate number of parts based on number of inters and start image number
+    number_of_parts = number_of_inters+1-start_image_number
+    splitted_source = splitImage(np_source, number_of_parts)
+    splitted_final = splitImage(np_final, number_of_parts)
 
     actual_image = splitted_source.copy()
     
-    for i in range(start_image_number, number_of_parts+1):
-        actual_image[i] = splitted_final[i]
+    for i in range(start_image_number, number_of_inters+1):
+        actual_image[i-start_image_number] = splitted_final[i-start_image_number]
         number = str(i+1)
         #add default image paths
         saveImage(glueImage(actual_image), defaultImagePath + number + extension)
