@@ -2,27 +2,25 @@
 #ImageApp\Scripts\activate
 import sys
 import time
+import pathlib
+
 import numpy as np 
 from PIL import Image
 import matplotlib.pyplot as plt
-import pathlib
 
-#from skimage import data
-#from skimage import filters
-#from skimage import exposure
+
 
 #defaultImagePath = "express-app/public/python/images/"
 
-#dla obu operacji odczytu zapisu trzeba zrobić obsługę błędów
 def readImage(filename, verbose=False):
     """Reading image from file and transform it to NumPy array
 
-    Keyword argument:
-    filename -- relative path to image
-    verbose -- if true showing image(default False)
+    Keyword arguments:
+        filename -- relative path to image
+        verbose -- if true showing image (default False)
 
     Return:
-    image as Numpy Array
+        np_image -- image as Numpy Array
     """
 
     pil_image = Image.open(filename)
@@ -31,6 +29,7 @@ def readImage(filename, verbose=False):
 
     np_image = np.array(pil_image, dtype=np.uint8)
 
+    #some grayscale images was readed as 3D with three equal color channels, implicitly in this app we want grascale image as 2D
     if len(np_image.shape) == 3:
         if np_image.shape[2] == 3:
             if np.array_equiv(np_image[:,:,0],np_image[:,:,1]) and np.array_equiv(np_image[:,:,2],np_image[:,:,1]):
@@ -41,8 +40,6 @@ def readImage(filename, verbose=False):
         pil_image = Image.open(filename).convert('L')
         np_image = np.array(pil_image, dtype=np.uint8)
 
-    #plt.imshow(np_image, vmin=0, vmax=255, cmap='gray')
-    #plt.show()
     np_image.setflags(write=1)
     
     return np_image
@@ -51,17 +48,17 @@ def saveImage(np_image, filename, verbose=False):
     """Saving image to file
 
     Keyword argument:
-    np_image -- image as NumPy array
-    filename -- relative to where image should be saved with filename conatining extension 
-    verbose -- if true showing image(default False)
+        np_image -- image as NumPy array
+        filename -- relative path to where image should be saved, with filename conatining extension 
+        verbose -- if true showing image(default False)
 
     Return:
     ---
     """
 
-    #tutaj w zależności jest czy obraz czarno biały czy kolorowy różne
     #image2 = Image.fromarray(grayscale, mode ='L')
     mode = getImageColorType(np_image)
+    #before saving 3D grascale image we must convert them to 2D
     if mode == 'xy1':
         np_image = grayTo2D(np_image)
         mode = getImageColorType(np_image)
@@ -70,17 +67,16 @@ def saveImage(np_image, filename, verbose=False):
     if verbose:
         pil_image.show()
     pil_image.save(filename)
-    #pil_image.save("./public/python/images/0.png")
-    #return coś o powodzeniu operacji
 
 def getHumanGrayscale(np_image):
     """Convert image to "Human" grayscale (0,215*R+0.7151*G+0.0721*B)
 
     Keyword argument:
-    np_image -- image as NumPy array
+        np_image -- image as NumPy array
 
     Return:
-    np_image_gray -- image as grayscale
+        np_image_gray -- image as 2D grayscale
+
     Important:
     !!! This operation reducing Array dimension from 3 to 2 !!!
     """
@@ -96,10 +92,10 @@ def getMachineGrayscale(np_image):
     """Convert image to "Machine" grayscale (R+G+B)/3
 
     Keyword argument:
-    np_image -- image as NumPy array
+        np_image -- image as NumPy array
 
     Return:
-    np_image_gray -- image as grayscale
+        np_image_gray -- image as 2D grayscale
     Important:
     !!! This operation reducing Array dimension from 3 to 2 !!!
     """
@@ -114,9 +110,10 @@ def getImageColorType(np_image):
     """Return image mode
 
     Keyword argument:
-    np_image -- image as NumPy array
+        np_image -- image as NumPy array
     Return:
     String data:
+        xy1 for 3D grayscale image
         L for grayscale image
         RGB for color image
     """
@@ -125,7 +122,7 @@ def getImageColorType(np_image):
         if np_image.shape[2] == 3:
             return 'RGB'
         else:
-            return 'L'
+            return 'xy1'
     elif len(np_image.shape) == 2:
         return 'L'
     #tutaj jakaś obsługa błędów
@@ -134,7 +131,7 @@ def getMinMaxPix(np_image):
     """Return  dictionary with max and min pixel value
 
     Keyword argument:
-    np_image -- image as NumPy array
+        np_image -- image as NumPy array
     Return:
         Python dictionary with keys: Max value, Min value 
     """
@@ -157,7 +154,8 @@ def getStatisticImageParameters(np_image):
     """Return statistical image parameters as dictionary(Variance, Standard devation, Median, Average)
 
     Keyword argument:
-    np_image_2dim -- image as 2D NumPy array(whole grayscale or one color channel)
+        np_image_2dim -- image as 2D NumPy array(whole grayscale or one color channel)
+
     Return:
         Python dictionary with keys: Variance, Standard devation, Median, Average 
     """
@@ -187,20 +185,17 @@ def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
     """ Return histogram for image in 2D Numpy array(grayscale or single channel)
 
     Keyword argument:
-    np_image_2dim -- image as 2D NumPy array(whole grayscale or one color channel)
-    normalize -- if set to True histogram values will be normalized(default = False)
-    with_bins -- return also bins as numpy arra(default= False)
+        np_image_2dim -- image as 2D NumPy array (whole grayscale or one color channel)
+        normalize -- if set to True histogram values will be normalized(default = False)
+        with_bins -- return also bins as numpy array (default= False)
 
     Return:
         histogram as NumPy array,
         bins as NumPy array if with_bins = True
 
     """
-    np_image_2dim = np_image_2dim.ravel()
-    #(np_hist, bins, patches) = plt.hist(np_image.ravel(), bins=256, range=(0.0, 255.0), fc='k', ec='k')
-    np_hist =  np.histogram(np_image_2dim.ravel(), bins=range(257))[0]
-    #np_hist = np_hist.astype(np.uint8)
-    #np_hist, bin_edges =  _bincount_histogram(image, source_range)
+    np_image_2D = np_image_2D.ravel()
+    np_hist =  np.histogram(np_image_2D.ravel(), bins=range(257))[0]
 
     if normalize:
         np_hist = np_hist / np.sum(hist)
@@ -220,9 +215,11 @@ def ensureGrayscale(np_image, info=False):
     """Ensures that given image is in grayscale
 
     Keyword argument:
-    np_image -- image as NumPy array
+        np_image -- image as NumPy array
+        info -- if true then also info about making conversion is return (default false)
     Return:
-    np_image as grayscale image
+        np_image -- grayscale image as 2D numpy array (if conversion was needed then Human Grayscale was used)
+        isConverted -- returned only if info == True, contains info about execution of conversion
     """
     isConverted = False
     if len(np_image.shape) == 3:
@@ -237,8 +234,14 @@ def ensureGrayscale(np_image, info=False):
 
 def ensure3D(np_image):
     """
-    Ensures that given image is 3 dimensional. If is 2D(grayscale) change to 3D(this operation do not changes information in image)
-    e.g np_image with shape(x,y) will be reshaping to (x,y,1)
+    Ensures that given grayscale image is 3 dimensional. If is 2D(grayscale) change to 3D(this operation do not changes information in image)
+    e.g np_image with shape(x,y) will be reshaping to (x,y,1). If image has been already grascale, then will be returned unchanged
+
+    Keyword argument:
+        np_image -- image as NumPy array (2D or 3D)
+
+    Return:
+        np_image -- image as 3D 
     """
 
     if(len(np_image.shape) == 2):
@@ -250,12 +253,23 @@ def grayTo2D(np_image):
     """
     Reshaping np_image grayscale image to 2 dimension 
     e.g np_image with shape(x,y,1) will be reshaping to (x,y)
+
+    Keyword argument:
+        np_image -- image as 2D grayscale
+
+    Return:
+        np_image -- image as 3D grayscale 
+
+
     """
     return np_image.reshape((np_image.shape[0], np_image.shape[1]))
 
 def isColorImage(np_image):
     """
     Check if image is colored (has 3 channels)
+
+    Keyword agument:
+        np_image -- image to check as numpy array
     Return 
         True if image is colored, false otherwise
     """
@@ -265,29 +279,33 @@ def isColorImage(np_image):
     
     return False
 
-def getWindow(np_image_bin, index, dir_size,  struct_elem):
+def getWindow(np_image, index, dir_size,  struct_elem):
     """Get window for morphological and filtering  operations
 
     Keyword argument:
-    index -- indexes of actual processing pixel as tuple
-    dir_size -- size of structural element in one direction (dir_size = (size-1)/2)
-    x_max -- max value of x index
-    y_max -- max value of y index
+        np_image -- image as numpy array from we take window
+        index -- indexes of actual processing pixel as tuple
+        dir_size -- size of structural element in one direction (dir_size = (size-1)/2)
+        x_max -- max value of x index
+        y_max -- max value of y index
     Return:
     np_window -- window of morphological operations with specific size and shape
     """
-    #zobaczyc czy to zadziała dla 3D
-    x_max, y_max = np_image_bin.shape[:2]
+
+    x_max, y_max = np_image.shape[:2]
     y_1 = index[1] - dir_size if index[1] - dir_size >= 0 else 0
     y_2 = index [1] + dir_size + 1 if index [1] + dir_size + 1  < y_max else -1
     x_1 = index[0] - dir_size if index[0] - dir_size >= 0 else 0
     x_2 = index [0] + dir_size + 1 if index [0] + dir_size + 1 < x_max else -1
 
     if struct_elem == 'rect':
-        np_window = np_image_bin[x_1:x_2, y_1:y_2]
+        np_window = np_image[x_1:x_2, y_1:y_2]
     elif struct_elem == 'cross':
-        cross_vert = np_image_bin[x_1:x_2, index[1]]
-        cross_hor = np_image_bin [index[0], y_1:y_2]
+        #take vertical part of cross
+        cross_vert = np_image[x_1:x_2, index[1]]
+        #takce horizontal part of cross
+        cross_hor = np_image [index[0], y_1:y_2]
+        #glue them to get whole cross
         np_window = np.concatenate((cross_vert, cross_hor))
     else:
         #TODO
@@ -297,33 +315,32 @@ def getWindow(np_image_bin, index, dir_size,  struct_elem):
 
 def splitImage(np_image, number_of_parts):
     """
-    Splitting image as 2-dimensional numpy array into array of parts.
+    Splitting image given as 2-dimensional numpy array into list of parts.
     Keyword argument:
-    np_image -- image to split, works for 2D and 3D images
-    number_of_parts -- number of parts to split image
+        np_image -- image to split, works for 2D and 3D images
+        number_of_parts -- number of parts to split image
     Return
-    np_split -- list of numpy array f.e:
-        1,2,3,4 is parts of image as numpy array, function return list [1,2,3,4]
+        np_split -- list of numpy array f.e:
+            1,2,3,4 is parts of image as numpy array, function return list [1,2,3,4]
     """
 
     if np_image.shape[0] % number_of_parts == 0:
-        splitted = np.split(np_image, number_of_parts, axis=0)
+        np_split = np.split(np_image, number_of_parts, axis=0)
     else:
         step = int(np_image.shape[0] / number_of_parts)
         max_equal_step = step*(number_of_parts-1)
-        splitted = np.split(np_image[:max_equal_step], number_of_parts-1)
-        splitted.append(np_image[max_equal_step:])
-        
-        #splitted = np.array_split(np_image, number_of_parts,axis=0)
-    return splitted
+        np_split = np.split(np_image[:max_equal_step], number_of_parts-1)
+        np_split.append(np_image[max_equal_step:])
+
+    return np_split
 
 def glueImage(splitted):
     """
     Glued vertically splitted images into one image.
     Keyword argument:
-    splitted -- list of images as numpy arrays
+        splitted -- list of images as numpy arrays
     Return
-    np_glued -- new, glued image as numpy array
+        np_glued -- new, glued image as numpy array
     """
 
     np_glued = np.vstack(tuple(splitted))
@@ -337,12 +354,11 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
     Additionally final image, will be saved.
     When number_of_inters == start_image_number, only final image will be saved
     Keyword argument: 
-    np_source -- based image
-    np_final -- final image
-    number_of_inters -- specified number of inter images
-    start_image_number -- number, which starts saving images
-    defaultImagePath -- path to saving image
-
+        np_source -- based image
+        np_final -- final image
+        number_of_inters -- specified number of inter images
+        start_image_number -- number, which starts saving images
+        defaultImagePath -- path to saving imageW
     """
 
     extension = ".png"
@@ -356,7 +372,6 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
     for i in range(start_image_number, number_of_inters+1):
         actual_image[i-start_image_number] = splitted_final[i-start_image_number]
         number = str(i+1)
-        #add default image paths
         saveImage(glueImage(actual_image), defaultImagePath + number + extension)
 
 def convert(o):
