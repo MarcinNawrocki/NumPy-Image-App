@@ -2,6 +2,7 @@ import numpy as np
 
 import basic_operations as bs
 
+#TESTED
 def medianFilter(np_image_2D, struct_elem='rect', size=3):
     """
     Processing median filtering with specified shape and size on given 2 dimensional image
@@ -16,10 +17,10 @@ def medianFilter(np_image_2D, struct_elem='rect', size=3):
     """
 
     dir_size = int((size-1)/2)
-    np_image_fil = np.zeros(np_image_2D.shape, dtype=np.uint8)
+    np_image_fil = np.empty(np_image_2D.shape, dtype=np.uint8)
 
-    #index is tuple with coordinates
-    for index in np.ndindex(np_image_2D):
+    #index is a tuple with coordinates
+    for index in np.ndindex(np_image_2D.shape):
         np_window = bs.getWindow(np_image_2D, index, dir_size, struct_elem)
         new_value = np.median(np_window)
         np_image_fil[index[0], index[1]] = new_value

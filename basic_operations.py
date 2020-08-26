@@ -76,9 +76,6 @@ def getHumanGrayscale(np_image):
 
     Return:
         np_image_gray -- image as 2D grayscale
-
-    Important:
-    !!! This operation reducing Array dimension from 3 to 2 !!!
     """
 
     to_mono_vector = [0.2125 , 0.7154 , 0.0721 ]
@@ -96,8 +93,6 @@ def getMachineGrayscale(np_image):
 
     Return:
         np_image_gray -- image as 2D grayscale
-    Important:
-    !!! This operation reducing Array dimension from 3 to 2 !!!
     """
 
     np_image_gray = np.zeros((np_image.shape[0],np_image.shape[1]), dtype=np.uint8)
@@ -194,8 +189,8 @@ def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
         bins as NumPy array if with_bins = True
 
     """
-    np_image_2D = np_image_2D.ravel()
-    np_hist =  np.histogram(np_image_2D.ravel(), bins=range(257))[0]
+    #np_image_2dim = np_image_2dim.ravel()
+    np_hist =  np.histogram(np_image_2dim.ravel(), bins=range(257))[0]
 
     if normalize:
         np_hist = np_hist / np.sum(hist)
@@ -245,9 +240,9 @@ def ensure3D(np_image):
     """
 
     if(len(np_image.shape) == 2):
-        return np_image.reshape((np_image.shape[0], np_image.shape[1],1))
+        return np_image.reshape((np_image.shape[0], np_image.shape[1],1)), True
     else:
-        return np_image
+        return np_image, False
 
 def grayTo2D(np_image):
     """
@@ -361,7 +356,7 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
         defaultImagePath -- path to saving imageW
     """
 
-    extension = ".png"
+    images = []
     #calculate number of parts based on number of inters and start image number
     number_of_parts = number_of_inters+1-start_image_number
     splitted_source = splitImage(np_source, number_of_parts)
@@ -371,8 +366,22 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
     
     for i in range(start_image_number, number_of_inters+1):
         actual_image[i-start_image_number] = splitted_final[i-start_image_number]
-        number = str(i+1)
-        saveImage(glueImage(actual_image), defaultImagePath + number + extension)
+        images.append(glueImage(actual_image))
+    
+    return images
+        
+def show_images(images, color_map='gray'):
+    
+    if (type(images) is list):
+        number_of_images = len(images)
+        f = plt.figure()
+        for i in range(number_of_images):
+            f.add_subplot(1, number_of_images, i + 1)
+            plt.imshow(images[i], cmap = color_map)
+        plt.show(block=True)
+    else:
+        plt.imshow(images, cmap = color_map)
+        plt.show()
 
 def convert(o):
     """
