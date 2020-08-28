@@ -303,8 +303,7 @@ def getWindow(np_image, index, dir_size,  struct_elem):
         #glue them to get whole cross
         np_window = np.concatenate((cross_vert, cross_hor))
     else:
-        #TODO
-        pass
+        raise ValueError (f"Inpropriate window type. Should be 'rect' or 'cross'. The value was {struct_elem}.")
 
     return np_window
 
@@ -382,6 +381,11 @@ def show_images(images, color_map='gray'):
     else:
         plt.imshow(images, cmap = color_map)
         plt.show()
+
+def validate_number_of_inters(number_of_inters, default):
+
+    if (number_of_inters < default):
+        raise ValueError(f"Number of inters value should be greater than {default}. The value was {number_of_inters}")
 
 def convert(o):
     """
