@@ -32,6 +32,40 @@ np_HP4 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 #New funcionalities
 #- showing descriptions while showing images (propably function should return the object not only list of images)
 
+def read_image(filename, verbose=False):
+    """[Reading image from a file and transform it to NumPy array]
+
+    Arguments:
+        filename {str} -- relative path to image
+
+    Keyword Arguments:
+        verbose {bool} -- if true showing animage (default: {False})
+
+    Returns:
+        [NumPy array] -- image as a NumPy array
+    """
+
+    pil_image = Image.open(filename)
+    if verbose:
+        pil_image.show()
+
+    np_image = np.array(pil_image, dtype=np.uint8)
+
+    #some grayscale images was readed as 3D with three equal color channels, implicitly in this app we want grascale image as 2D
+    if len(np_image.shape) == 3:
+        if np_image.shape[2] == 3:
+            if np.array_equiv(np_image[:,:,0],np_image[:,:,1]) and np.array_equiv(np_image[:,:,2],np_image[:,:,1]):
+                np_image = np_image[:,:,0]
+                np_image = grayTo2D(np_image)
+    else:
+        #we must convert images which is read as 2 dimensional grayscale images
+        pil_image = Image.open(filename).convert('L')
+        np_image = np.array(pil_image, dtype=np.uint8)
+
+    np_image.setflags(write=1)
+    
+    return np_image
+
 def grayscale(np_org_image, gray="human"):
     """Converts image to grayscale 
 
@@ -492,3 +526,10 @@ def show_images(images, color_map='gray'):
         except TypeError as e:
             print("Non displayable data passed. Should be a list of NumPy arrays or a numpy array.")
             print("Matplotlib error info: ", e)
+
+"""
+if __name__ == "__main__":
+    np_image = bs.readImage("your_image.png")
+    images = openly(np_image)
+    show_images(images)
+"""

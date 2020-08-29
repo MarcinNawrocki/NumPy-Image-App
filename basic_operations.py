@@ -12,37 +12,6 @@ import matplotlib.pyplot as plt
 
 #defaultImagePath = "express-app/public/python/images/"
 
-def readImage(filename, verbose=False):
-    """Reading image from file and transform it to NumPy array
-
-    Keyword arguments:
-        filename -- relative path to image
-        verbose -- if true showing image (default False)
-
-    Return:
-        np_image -- image as Numpy Array
-    """
-
-    pil_image = Image.open(filename)
-    if verbose:
-        pil_image.show()
-
-    np_image = np.array(pil_image, dtype=np.uint8)
-
-    #some grayscale images was readed as 3D with three equal color channels, implicitly in this app we want grascale image as 2D
-    if len(np_image.shape) == 3:
-        if np_image.shape[2] == 3:
-            if np.array_equiv(np_image[:,:,0],np_image[:,:,1]) and np.array_equiv(np_image[:,:,2],np_image[:,:,1]):
-                np_image = np_image[:,:,0]
-                np_image = grayTo2D(np_image)
-    else:
-        #we must convert images which is read as 2 dimensional grayscale images
-        pil_image = Image.open(filename).convert('L')
-        np_image = np.array(pil_image, dtype=np.uint8)
-
-    np_image.setflags(write=1)
-    
-    return np_image
 
 def saveImage(np_image, filename, verbose=False):
     """Saving image to file
