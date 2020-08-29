@@ -2,6 +2,7 @@ import numpy as np
 
 import basic_operations as bs
 
+#TESTED
 def medianFilter(np_image_2D, struct_elem='rect', size=3):
     """
     Processing median filtering with specified shape and size on given 2 dimensional image
@@ -15,12 +16,11 @@ def medianFilter(np_image_2D, struct_elem='rect', size=3):
         np_image_fil -- image as numpy 2D array, after median filtering
     """
 
-    dir_size = int((size-1)/2)
-    np_image_fil = np.zeros(np_image_2D.shape, dtype=np.uint8)
+    np_image_fil = np.empty(np_image_2D.shape, dtype=np.uint8)
 
-    #index is tuple with coordinates
-    for index in np.ndindex(np_image_2D):
-        np_window = bs.getWindow(np_image_2D, index, dir_size, struct_elem)
+    #index is a tuple with coordinates
+    for index in np.ndindex(np_image_2D.shape):
+        np_window = bs.getWindow(np_image_2D, index, size, struct_elem)
         new_value = np.median(np_window)
         np_image_fil[index[0], index[1]] = new_value
 
@@ -37,8 +37,7 @@ def matrixFilter(np_image_2D, np_mask):
     """
     
     size = np_mask.shape[0]
-    #mask size in one direction ( for 5x5 is 2, for 7x7 is 3 etc)
-    dir_size = int((size-1)/2)
+    
     mask_sum = np_mask.sum()
     np_image_fil = np.copy(np_image_2D)
     x_max, y_max = np_image_2D.shape
@@ -47,7 +46,7 @@ def matrixFilter(np_image_2D, np_mask):
     for index, x in np.ndenumerate(np_image_2D):
         #ensure that window doesn't go out of image range
         if (index[0] >= dir_size and index[0] < x_max-dir_size-1 and index[1] >= dir_size and index[1] < y_max-dir_size-1):
-            np_window = bs.getWindow(np_image_2D, index, dir_size, struct_elem='rect')
+            np_window = bs.getWindow(np_image_2D, index, size, struct_elem='rect')
             np_window = np_window * np_mask
             window_sum = np_window.sum()
             #avoid division by zero

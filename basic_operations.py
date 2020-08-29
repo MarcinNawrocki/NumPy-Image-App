@@ -76,9 +76,6 @@ def getHumanGrayscale(np_image):
 
     Return:
         np_image_gray -- image as 2D grayscale
-
-    Important:
-    !!! This operation reducing Array dimension from 3 to 2 !!!
     """
 
     to_mono_vector = [0.2125 , 0.7154 , 0.0721 ]
@@ -96,8 +93,6 @@ def getMachineGrayscale(np_image):
 
     Return:
         np_image_gray -- image as 2D grayscale
-    Important:
-    !!! This operation reducing Array dimension from 3 to 2 !!!
     """
 
     np_image_gray = np.zeros((np_image.shape[0],np_image.shape[1]), dtype=np.uint8)
@@ -194,8 +189,8 @@ def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
         bins as NumPy array if with_bins = True
 
     """
-    np_image_2D = np_image_2D.ravel()
-    np_hist =  np.histogram(np_image_2D.ravel(), bins=range(257))[0]
+    #np_image_2dim = np_image_2dim.ravel()
+    np_hist =  np.histogram(np_image_2dim.ravel(), bins=range(257))[0]
 
     if normalize:
         np_hist = np_hist / np.sum(hist)
@@ -245,9 +240,9 @@ def ensure3D(np_image):
     """
 
     if(len(np_image.shape) == 2):
-        return np_image.reshape((np_image.shape[0], np_image.shape[1],1))
+        return np_image.reshape((np_image.shape[0], np_image.shape[1],1)), True
     else:
-        return np_image
+        return np_image, False
 
 def grayTo2D(np_image):
     """
@@ -279,18 +274,24 @@ def isColorImage(np_image):
     
     return False
 
-def getWindow(np_image, index, dir_size,  struct_elem):
+def getWindow(np_image, index, size,  struct_elem):
     """Get window for morphological and filtering  operations
 
     Keyword argument:
         np_image -- image as numpy array from we take window
         index -- indexes of actual processing pixel as tuple
-        dir_size -- size of structural element in one direction (dir_size = (size-1)/2)
+        size -- size of structural element
         x_max -- max value of x index
         y_max -- max value of y index
     Return:
     np_window -- window of morphological operations with specific size and shape
     """
+
+    if (size < 3) or (size % 2 == 0 ):
+        raise ValueError(f"Inpropriate size value. Should be odd and greater than 2. Value was {size} ")
+
+    #size of structural element in one direction
+    dir_size = int((size-1)/2)
 
     x_max, y_max = np_image.shape[:2]
     y_1 = index[1] - dir_size if index[1] - dir_size >= 0 else 0
@@ -308,8 +309,7 @@ def getWindow(np_image, index, dir_size,  struct_elem):
         #glue them to get whole cross
         np_window = np.concatenate((cross_vert, cross_hor))
     else:
-        #TODO
-        pass
+        raise ValueError (f"Inpropriate window type. Should be 'rect' or 'cross'. The value was {struct_elem}.")
 
     return np_window
 
@@ -361,7 +361,7 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
         defaultImagePath -- path to saving imageW
     """
 
-    extension = ".png"
+    images = []
     #calculate number of parts based on number of inters and start image number
     number_of_parts = number_of_inters+1-start_image_number
     splitted_source = splitImage(np_source, number_of_parts)
@@ -371,8 +371,41 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
     
     for i in range(start_image_number, number_of_inters+1):
         actual_image[i-start_image_number] = splitted_final[i-start_image_number]
-        number = str(i+1)
-        saveImage(glueImage(actual_image), defaultImagePath + number + extension)
+        images.append(glueImage(actual_image))
+    
+    return images
+        
+def show_images(images, color_map='gray'):
+    """[summary]
+
+    Arguments:
+        images {[type]} -- [description]
+
+    Keyword Arguments:
+        color_map {str} -- [description] (default: {'gray'})
+    """
+    if (type(images) is list):
+        number_of_images = len(images)
+        nrows = number_of_images // 5
+        ncols = number_of_images // nrows
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(8,8))
+        for i, axi in enumerate(ax.flat):
+            axi.imshow(images[i], cmap = color_map)
+        plt.tight_layout(True)
+        plt.show()
+    else:
+        try:
+            plt.imshow(images, cmap = color_map)
+            plt.show()
+        except TypeError as e:
+            print("Non displayable data passed. Should be a list of NumPy arrays or a numpy array.")
+            print("Matplotlib error info: ", e)
+
+
+def validate_number_of_inters(number_of_inters, default):
+
+    if (number_of_inters < default):
+        raise ValueError(f"Number of inters value should be greater than {default}. The value was {number_of_inters}")
 
 def convert(o):
     """

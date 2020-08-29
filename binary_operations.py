@@ -21,14 +21,14 @@ def thresholdBinaryzation(np_image_2D, threshold):
     np_image_thr = np_image_thr.astype(np.uint8)
     return np_image_thr
     
-def otsuBinaryzation(np_image_2D):
+def otsuBinaryzation(np_image_2D, only_threshold = True):
     """Return binaryzed image, getting by use of Otsu method
     Algorithm calculated Otsu using maximalization between class variance
 
     Keyword argument:
         np_image_2D -- two dimensional image as NumPy array (grayscale or single color channel)
     Return:
-        Binaryzed image as numpy array with 0 and 255 values
+        Threshold calcualted using otsu method
     """
 
     np_hist, np_thresholds = bs.getImageHistogram(np_image_2D, with_bins=True)
@@ -49,7 +49,11 @@ def otsuBinaryzation(np_image_2D):
 
     #max between class variance is the threshold that we looking for
     otsu_threshold = np.argmax(np_bcv)
-    return thresholdBinaryzation(np_image_2D, otsu_threshold)
+
+    if only_threshold:
+        return otsu_threshold
+    else:
+        return thresholdBinaryzation(np_image_2D,otsu_threshold)
 
 def dilate(np_image_bin, struct_elem='rect', size=3):
     """Execute dilate morphological operation on binaryzed image
@@ -66,10 +70,8 @@ def dilate(np_image_bin, struct_elem='rect', size=3):
     np_image_bin = np_image_bin.astype(np.uint8)
     np_image_dil = np.zeros(np_image_bin.shape, dtype=np.uint8)
     
-    dir_size = int((size-1)/2)
-
     for index, x in np.ndenumerate(np_image_bin):
-        np_window = bs.getWindow(np_image_bin, index, dir_size, struct_elem)
+        np_window = bs.getWindow(np_image_bin, index, size, struct_elem)
 
         if np_window.min() != 0:
             np_image_dil[index[0], index[1]] = 255
@@ -90,10 +92,8 @@ def erode(np_image_bin, struct_elem='rect', size=3):
     np_image_bin = np_image_bin.astype(np.uint8)
     np_image_er = np.zeros(np_image_bin.shape, dtype=np.uint8)
     
-    dir_size = int((size-1)/2)
-
     for index, x in np.ndenumerate(np_image_bin):
-        np_window = bs.getWindow(np_image_bin, index, dir_size, struct_elem)
+        np_window = bs.getWindow(np_image_bin, index, size, struct_elem)
         
         if np_window.max() == 255:
             np_image_er[index[0], index[1]] = 255
