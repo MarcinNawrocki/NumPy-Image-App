@@ -27,10 +27,10 @@ np_HP4 = np.array([[0,-1,0],[-1,20,-1], [0,-1,0]])
 #http://www.algorytm.org/przetwarzanie-obrazow/filtrowanie-obrazow.html
 
 #TODO:
-#- size validation
-#- displaying images in rows 
-#- eliminate code repeating in:
-    #filterings(median, filter, gamma)
+#- docstrings in other files
+
+#New funcionalities
+#- showing descriptions while showing images (propably function should return the object not only list of images)
 
 def grayscale(np_org_image, gray="human"):
     """Converts image to grayscale 
@@ -469,5 +469,5 @@ def salt_pepper_noising(np_org_image, propability = 0.05, saltPepperRatio = 0.5,
 
 
 np_image = bs.readImage("Lena-gray.png")
-images = closely(np_image)
+images = openly(np_image, number_of_inters=8)
 bs.show_images(images)

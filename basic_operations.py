@@ -274,18 +274,24 @@ def isColorImage(np_image):
     
     return False
 
-def getWindow(np_image, index, dir_size,  struct_elem):
+def getWindow(np_image, index, size,  struct_elem):
     """Get window for morphological and filtering  operations
 
     Keyword argument:
         np_image -- image as numpy array from we take window
         index -- indexes of actual processing pixel as tuple
-        dir_size -- size of structural element in one direction (dir_size = (size-1)/2)
+        size -- size of structural element
         x_max -- max value of x index
         y_max -- max value of y index
     Return:
     np_window -- window of morphological operations with specific size and shape
     """
+
+    if (size < 3) or (size % 2 == 0 ):
+        raise ValueError(f"Inpropriate size value. Should be odd and greater than 2. Value was {size} ")
+
+    #size of structural element in one direction
+    dir_size = int((size-1)/2)
 
     x_max, y_max = np_image.shape[:2]
     y_1 = index[1] - dir_size if index[1] - dir_size >= 0 else 0
@@ -370,17 +376,31 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
     return images
         
 def show_images(images, color_map='gray'):
-    
+    """[summary]
+
+    Arguments:
+        images {[type]} -- [description]
+
+    Keyword Arguments:
+        color_map {str} -- [description] (default: {'gray'})
+    """
     if (type(images) is list):
         number_of_images = len(images)
-        f = plt.figure()
-        for i in range(number_of_images):
-            f.add_subplot(1, number_of_images, i + 1)
-            plt.imshow(images[i], cmap = color_map)
-        plt.show(block=True)
-    else:
-        plt.imshow(images, cmap = color_map)
+        nrows = number_of_images // 5
+        ncols = number_of_images // nrows
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(8,8))
+        for i, axi in enumerate(ax.flat):
+            axi.imshow(images[i], cmap = color_map)
+        plt.tight_layout(True)
         plt.show()
+    else:
+        try:
+            plt.imshow(images, cmap = color_map)
+            plt.show()
+        except TypeError as e:
+            print("Non displayable data passed. Should be a list of NumPy arrays or a numpy array.")
+            print("Matplotlib error info: ", e)
+
 
 def validate_number_of_inters(number_of_inters, default):
 

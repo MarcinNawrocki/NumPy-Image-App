@@ -70,10 +70,8 @@ def dilate(np_image_bin, struct_elem='rect', size=3):
     np_image_bin = np_image_bin.astype(np.uint8)
     np_image_dil = np.zeros(np_image_bin.shape, dtype=np.uint8)
     
-    dir_size = int((size-1)/2)
-
     for index, x in np.ndenumerate(np_image_bin):
-        np_window = bs.getWindow(np_image_bin, index, dir_size, struct_elem)
+        np_window = bs.getWindow(np_image_bin, index, size, struct_elem)
 
         if np_window.min() != 0:
             np_image_dil[index[0], index[1]] = 255
@@ -94,10 +92,8 @@ def erode(np_image_bin, struct_elem='rect', size=3):
     np_image_bin = np_image_bin.astype(np.uint8)
     np_image_er = np.zeros(np_image_bin.shape, dtype=np.uint8)
     
-    dir_size = int((size-1)/2)
-
     for index, x in np.ndenumerate(np_image_bin):
-        np_window = bs.getWindow(np_image_bin, index, dir_size, struct_elem)
+        np_window = bs.getWindow(np_image_bin, index, size, struct_elem)
         
         if np_window.max() == 255:
             np_image_er[index[0], index[1]] = 255
