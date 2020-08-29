@@ -100,81 +100,6 @@ def getMachineGrayscale(np_image):
     np_image_gray = np_image_gray.astype(np.uint8)
     np_image_gray = grayTo2D(np_image_gray)
     return np_image_gray
-
-def getImageColorType(np_image):
-    """Return image mode
-
-    Keyword argument:
-        np_image -- image as NumPy array
-    Return:
-    String data:
-        xy1 for 3D grayscale image
-        L for grayscale image
-        RGB for color image
-    """
-
-    if len(np_image.shape) == 3:
-        if np_image.shape[2] == 3:
-            return 'RGB'
-        else:
-            return 'xy1'
-    elif len(np_image.shape) == 2:
-        return 'L'
-    #tutaj jakaś obsługa błędów
-
-def getMinMaxPix(np_image):
-    """Return  dictionary with max and min pixel value
-
-    Keyword argument:
-        np_image -- image as NumPy array
-    Return:
-        Python dictionary with keys: Max value, Min value 
-    """
-
-    parameters = {}
-
-    if isColorImage(np_image):
-        parameters['R_Max_value'] = np.amax(np_image[:,:,0])
-        parameters['R_Min_Value'] = np.amin(np_image[:,:,0])
-        parameters['G_Max_value'] = np.amax(np_image[:,:,1])
-        parameters['G_Min_Value'] = np.amin(np_image[:,:,1])
-        parameters['B_Max_value'] = np.amax(np_image[:,:,2])
-        parameters['B_Min_Value'] = np.amin(np_image[:,:,2])
-    else: 
-        parameters = {"Max_value" : np.amax(np_image), "Min_value" : np.amin(np_image)}
-
-    return parameters
-
-def getStatisticImageParameters(np_image):
-    """Return statistical image parameters as dictionary(Variance, Standard devation, Median, Average)
-
-    Keyword argument:
-        np_image_2dim -- image as 2D NumPy array(whole grayscale or one color channel)
-
-    Return:
-        Python dictionary with keys: Variance, Standard devation, Median, Average 
-    """
-    parameters = {}
-    if isColorImage(np_image):
-        parameters['R_Variance'] = np.var(np_image[:,:,0])
-        parameters['R_Standard_devation'] = np.std(np_image[:,:,0])
-        parameters['R_Median'] = np.median(np_image[:,:,0])
-        parameters['R_Average'] = np.average(np_image[:,:,0])
-        parameters['G_Variance'] = np.var(np_image[:,:,1])
-        parameters['G_Standard_devation'] = np.std(np_image[:,:,1])
-        parameters['G_Median'] = np.median(np_image[:,:,1])
-        parameters['G_Average'] = np.average(np_image[:,:,1])
-        parameters['B_Variance'] = np.var(np_image[:,:,2])
-        parameters['B_Standard_devation'] = np.std(np_image[:,:,2])
-        parameters['B_Median'] = np.median(np_image[:,:,2])
-        parameters['B_Average'] = np.average(np_image[:,:,2])
-
-
-    else: 
-        parameters = {'Variance' : np.var(np_image), 'Standard_devation' : np.std(np_image), 
-        "Median" : np.median(np_image), "Average" : np.average(np_image)}
-
-    return parameters
     
 def getImageHistogram(np_image_2dim, normalize = False, with_bins = False):
     """ Return histogram for image in 2D Numpy array(grayscale or single channel)
@@ -375,32 +300,6 @@ def generateInterImages(np_source, np_final, number_of_inters, start_image_numbe
     
     return images
         
-def show_images(images, color_map='gray'):
-    """[summary]
-
-    Arguments:
-        images {[type]} -- [description]
-
-    Keyword Arguments:
-        color_map {str} -- [description] (default: {'gray'})
-    """
-    if (type(images) is list):
-        number_of_images = len(images)
-        nrows = number_of_images // 5
-        ncols = number_of_images // nrows
-        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(8,8))
-        for i, axi in enumerate(ax.flat):
-            axi.imshow(images[i], cmap = color_map)
-        plt.tight_layout(True)
-        plt.show()
-    else:
-        try:
-            plt.imshow(images, cmap = color_map)
-            plt.show()
-        except TypeError as e:
-            print("Non displayable data passed. Should be a list of NumPy arrays or a numpy array.")
-            print("Matplotlib error info: ", e)
-
 
 def validate_number_of_inters(number_of_inters, default):
 

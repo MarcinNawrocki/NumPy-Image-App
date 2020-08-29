@@ -7,22 +7,22 @@ from skimage import exposure
 import basic_operations as bs 
 
 
-def thresholdBinaryzation(np_image_2D, threshold):
-    """Return binaryzed image based on threshold given by user
+def thresholdBinarization(np_image_2D, threshold):
+    """Return binarized image based on threshold given by user
 
     Keyword argument:
         np_image_2D -- two dimensional image as NumPy array (grayscale or single color channel)
         thershold -- integer value in range (0,255)
     Return:
-        Binaryzed image as numpy array with 0 and 255 values
+        binarized image as numpy array with 0 and 255 values
     """
    
     np_image_thr = np.where(np_image_2D > threshold,255,0)
     np_image_thr = np_image_thr.astype(np.uint8)
     return np_image_thr
     
-def otsuBinaryzation(np_image_2D, only_threshold = True):
-    """Return binaryzed image, getting by use of Otsu method
+def otsuBinarization(np_image_2D, only_threshold = True):
+    """Return binarized image, getting by use of Otsu method
     Algorithm calculated Otsu using maximalization between class variance
 
     Keyword argument:
@@ -53,13 +53,13 @@ def otsuBinaryzation(np_image_2D, only_threshold = True):
     if only_threshold:
         return otsu_threshold
     else:
-        return thresholdBinaryzation(np_image_2D,otsu_threshold)
+        return thresholdBinarization(np_image_2D,otsu_threshold)
 
 def dilate(np_image_bin, struct_elem='rect', size=3):
-    """Execute dilate morphological operation on binaryzed image
+    """Execute dilate morphological operation on binarized image
 
     Keyword argument:
-        np_image_bin -- binaryzed image as NumPy array
+        np_image_bin -- binarized image as NumPy array
         struct_elem:
             cross - cross structural element
             rect - rectangle structural element
@@ -79,9 +79,9 @@ def dilate(np_image_bin, struct_elem='rect', size=3):
     return np_image_dil 
 
 def erode(np_image_bin, struct_elem='rect', size=3):
-    """Execute erode morphological operation on binaryzed image
+    """Execute erode morphological operation on binarized image
     Keyword argument:
-        np_image_bin -- binaryzed image as NumPy array
+        np_image_bin -- binarized image as NumPy array
         struct_elem:
             cross - cross structural element
             rect - rectangle structural element
